@@ -1,14 +1,16 @@
 import type { StudyPathData } from "@/lib/types"
 import { ProgressBar } from "@/components/ui/progress-bar"
 import { MetricCard } from "@/components/ui/metric-card"
-import { HOURS_PER_WORKING_DAY, PHASE_MAP } from "@/lib/constants"
+import { HOURS_PER_WORKING_DAY, PHASE_MAP, START_DATE } from "@/lib/constants"
 import { formatHours } from "@/lib/date-utils"
+import { TodayPanel } from "@/components/today-panel"
 
 interface DashboardViewProps {
   pathData: StudyPathData
+  onLogHours: (taskId: string, hours: number) => void
 }
 
-export function DashboardView({ pathData }: DashboardViewProps) {
+export function DashboardView({ pathData, onLogHours }: DashboardViewProps) {
   const {
     progressGeneral = 0,
     remainingWorkingDays = 0,
@@ -35,11 +37,13 @@ export function DashboardView({ pathData }: DashboardViewProps) {
 
   return (
     <div className="p-4 sm:p-8 space-y-10">
+      <TodayPanel pathData={pathData} onLogHours={onLogHours} />
+
       {/* General Progress */}
       <div className="bg-slate-800 p-8 rounded-xl shadow-2xl border-t-4 border-indigo-500">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">Progreso General del Plan</h2>
         <p className="text-slate-400 mb-6">
-          Plan DATA/BI Specialist - 3 horas diarias (15 horas por semana) - 52 semanas totales
+          Plan DATA/BI Specialist + Claude y certificaciones - {HOURS_PER_WORKING_DAY} horas por día hábil - {totalWeeks} semanas (desde {START_DATE.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })})
         </p>
         <ProgressBar
           label={`${formatHours(loggedHoursAll, HOURS_PER_WORKING_DAY)} completadas de ${formatHours(totalEstimatedHours, HOURS_PER_WORKING_DAY)} en total.`}
@@ -55,7 +59,7 @@ export function DashboardView({ pathData }: DashboardViewProps) {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <MetricCard title="Carga Semanal Uniforme" value="15 Horas" icon="⏳" color="purple-500" />
+        <MetricCard title="Carga Semanal Media" value={`${Math.round(totalEstimatedHours / (totalWeeks || 1))} Horas`} icon="⏳" color="purple-500" />
         <MetricCard title="Días Hábiles Restantes" value={remainingWorkingDays} icon="🗓️" color="amber-500" />
         <MetricCard title="Fecha de Fin Proyectada" value={completionDate} icon="🏁" color="emerald-500" />
         <MetricCard title="Semana Actual" value={`Semana ${currentWeek} / ${totalWeeks}`} icon="🗺️" color="sky-500" />

@@ -1,13 +1,17 @@
 import type { ColorConfig } from "./types"
 
-export const HOURS_PER_WORKING_DAY = 3
+export const HOURS_PER_WORKING_DAY = 4
 export const TOTAL_WEEKS = 52
+// Lunes de la semana 1. Las semanas del plan se calendarizan desde aquí.
+export const START_DATE = new Date(2026, 9, 5)
 export const LOCAL_STORAGE_KEY = "studyPathLocal"
 
 export const PROFILE_MAP: Record<string, ColorConfig> = {
   da: { name: "Data Analyst", color: "sky-500" },
   bi: { name: "Business Intelligence", color: "violet-500" },
   ml: { name: "Machine Learning", color: "fuchsia-500" },
+  de: { name: "Data Engineer", color: "cyan-500" },
+  ds: { name: "Data Scientist", color: "rose-500" },
 }
 
 export const TECH_MAP: Record<string, ColorConfig> = {
@@ -28,7 +32,21 @@ export const CATEGORY_MAP: Record<string, ColorConfig> = {
   consolidacion: { name: "Consolidación", color: "amber-600" },
   empleabilidad: { name: "Empleabilidad", color: "pink-600" },
   certificacion: { name: "Certificación", color: "purple-600" },
+  claude: { name: "Claude / Anthropic", color: "orange-600" },
+  python_avanzado: { name: "Python Avanzado", color: "blue-600" },
+  analisis: { name: "Análisis", color: "teal-600" },
+  bi: { name: "Business Intelligence", color: "violet-600" },
+  ml: { name: "Machine Learning", color: "fuchsia-600" },
+  ingenieria: { name: "Ingeniería de Datos", color: "cyan-600" },
+  ia: { name: "IA Generativa", color: "purple-500" },
 }
+
+export const CERTIFICATIONS = [
+  "Google Data Analytics",
+  "AI-900 Azure AI",
+  "Google Advanced DA",
+  "PL-300 Power BI",
+]
 
 export const PHASE_MAP: Record<number, { name: string; color: string }> = {
   1: { name: "FASE 1: Fundamentos Sólidos", color: "indigo-500" },

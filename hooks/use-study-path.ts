@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import type { StudyPathData } from "@/lib/types"
 import { generateStudyPlan, recalculateProgress } from "@/lib/study-plan"
 import { LOCAL_STORAGE_KEY } from "@/lib/constants"
+import { dateKey } from "@/lib/date-utils"
 
 export function useStudyPath() {
   const [pathData, setPathData] = useState<StudyPathData | null>(null)
@@ -20,6 +21,7 @@ export function useStudyPath() {
           const mergedPath = {
             ...initialPlan,
             loggedHours: parsed.loggedHours || {},
+            dailyHours: parsed.dailyHours || {},
           }
           setPathData(recalculateProgress(mergedPath))
         } catch (error) {
@@ -37,7 +39,7 @@ export function useStudyPath() {
   }, [])
 
   const saveData = useCallback(
-    (newLoggedHours: Record<string, number>) => {
+    (newLoggedHours: Record<string, number>, newDailyHours: Record<string, number>) => {
       if (!pathData) return
 
       const dataToSave: StudyPathData = {
@@ -45,10 +47,11 @@ export function useStudyPath() {
         totalEstimatedHours: pathData.totalEstimatedHours,
         totalEstimatedWorkingDays: pathData.totalEstimatedWorkingDays,
         loggedHours: newLoggedHours,
+        dailyHours: newDailyHours,
       }
 
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave))
-      setPathData(recalculateProgress({ ...pathData, loggedHours: newLoggedHours }))
+      setPathData(recalculateProgress({ ...pathData, loggedHours: newLoggedHours, dailyHours: newDailyHours }))
     },
     [pathData],
   )
@@ -75,7 +78,15 @@ export function useStudyPath() {
         newLoggedHours[taskId] = newHours
       }
 
-      saveData(newLoggedHours)
+      // Registro diario (para "Hoy", racha y gráfico semanal): solo lo realmente aplicado
+      const applied = newHours - currentHours
+      const today = dateKey()
+      const newDailyHours = { ...(pathData.dailyHours || {}) }
+      const todayTotal = Math.max(0, Math.round(((newDailyHours[today] || 0) + applied) * 10) / 10)
+      if (todayTotal === 0) delete newDailyHours[today]
+      else newDailyHours[today] = todayTotal
+
+      saveData(newLoggedHours, newDailyHours)
     },
     [pathData, saveData],
   )

@@ -2,6 +2,7 @@
 
 import type { StudyPathData } from "@/lib/types"
 import { HourActionButton } from "@/components/ui/hour-action-button"
+import { weekStart } from "@/lib/date-utils"
 import { PROFILE_MAP, TECH_MAP, CATEGORY_MAP, PHASE_MAP } from "@/lib/constants"
 
 interface StudyPathViewProps {
@@ -32,7 +33,7 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
   return (
     <div className="p-4 sm:p-8">
       <h2 className="text-3xl font-extrabold text-white mb-6">Ruta de Estudio Detallada</h2>
-      <p className="text-slate-400 mb-8">Plan completo de 52 semanas - 3 horas diarias de estudio (Lunes a Viernes)</p>
+      <p className="text-slate-400 mb-8">Plan completo de 52 semanas, del {weekStart(1).toLocaleDateString("es-ES", { month: "long", year: "numeric" })} al {weekStart(53).toLocaleDateString("es-ES", { month: "long", year: "numeric" })} (Lunes a Viernes)</p>
       <div className="space-y-8">
         {Object.values(weeks).map((weekObj) => {
           const isCurrentWeek = weekObj.week === currentWeek
@@ -55,10 +56,10 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
                     {PHASE_MAP[weekPhase].name}
                   </h3>
                   <p className="text-sm text-slate-400 mt-1">
-                    {weekPhase === 1 && "Python, SQL, Excel, Estadística básica, Git"}
-                    {weekPhase === 2 && "EDA, Visualización, Power BI, Tableau, ML básico"}
-                    {weekPhase === 3 && "Proyectos Capstone, Big Data, IA Generativa"}
-                    {weekPhase === 4 && "Cloud, Portfolio, Certificaciones, Job Hunting"}
+                    {weekPhase === 1 && "Python, SQL, Excel, Estadística básica, Git, Claude, Google DA (inicio)"}
+                    {weekPhase === 2 && "EDA, Visualización, Power BI, Tableau, Google DA, AI-900, Claude Code"}
+                    {weekPhase === 3 && "ML, Claude API y MCP, Google Advanced DA"}
+                    {weekPhase === 4 && "Big Data, Cloud, IA, PL-300, Portfolio, Job Hunting"}
                   </p>
                 </div>
               )}
@@ -72,6 +73,9 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className={`text-xl font-bold ${isCurrentWeek ? "text-indigo-300" : "text-white"}`}>
                     Semana {weekObj.week}
+                    <span className="ml-3 text-sm font-normal text-slate-400">
+                      {weekStart(weekObj.week).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}
+                    </span>
                   </h3>
                   <span className={`text-sm font-semibold ${isCurrentWeek ? "text-indigo-300" : "text-slate-400"}`}>
                     {weeklyHoursTotal}h (Carga Semanal)

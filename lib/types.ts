@@ -9,6 +9,7 @@ export interface Task {
   profile: string[]
   progress: number
   links?: string[]
+  cert?: string
 }
 
 export interface ColorConfig {
@@ -27,9 +28,14 @@ export interface StudyPathData {
   totalEstimatedHours: number
   totalEstimatedWorkingDays: number
   loggedHours: Record<string, number>
+  dailyHours?: Record<string, number>
   loggedHoursAll?: number
   progressGeneral?: number
   currentWeek?: number
+  calendarWeek?: number
+  idealHours?: number
+  hoursDiff?: number
+  certsEarned?: string[]
   remainingWorkingDays?: number
   completionDate?: string
   techStats?: StatData[]

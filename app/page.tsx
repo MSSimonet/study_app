@@ -49,7 +49,7 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto">
         {view === "dashboard" ? (
-          <DashboardView pathData={pathData} />
+          <DashboardView pathData={pathData} onLogHours={logHours} />
         ) : (
           <StudyPathView pathData={pathData} onLogHours={logHours} />
         )}

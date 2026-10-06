@@ -1,6 +1,7 @@
 import type { StudyPathData, Task, StatData } from "./types"
-import { HOURS_PER_WORKING_DAY, TOTAL_WEEKS, PROFILE_MAP, TECH_MAP, CATEGORY_MAP } from "./constants"
-import { addWorkingDays } from "./date-utils"
+import { HOURS_PER_WORKING_DAY, TOTAL_WEEKS, PROFILE_MAP, TECH_MAP, CATEGORY_MAP, START_DATE } from "./constants"
+import { addWorkingDays, weekStart } from "./date-utils"
+import { getExtraTasks } from "./extra-tasks"
 
 interface TaskTemplate {
   name: string
@@ -9,6 +10,7 @@ interface TaskTemplate {
   tech: string[]
   profile: string[]
   links?: string[]
+  cert?: string
 }
 
 /**
@@ -19,7 +21,8 @@ export function generateStudyPlan(): StudyPathData {
   let totalEstimatedHours = 0
 
   for (let week = 1; week <= TOTAL_WEEKS; week++) {
-    const tasks = getWeeklyTasks(week)
+    // Las tareas extra (Claude/Anthropic, certificaciones) van al final para no alterar los ids ya guardados
+    const tasks = [...getWeeklyTasks(week), ...getExtraTasks(week)]
 
     tasks.forEach((task, index) => {
       totalEstimatedHours += task.durationHours
@@ -34,6 +37,7 @@ export function generateStudyPlan(): StudyPathData {
         profile: task.profile,
         progress: 0,
         links: task.links,
+        cert: task.cert,
       })
     })
   }
@@ -1144,12 +1148,25 @@ export function recalculateProgress(data: StudyPathData): StudyPathData {
   const remainingWorkingDays = Math.ceil(remainingHours / HOURS_PER_WORKING_DAY)
   const completionDate = addWorkingDays(new Date(), remainingWorkingDays)
 
+  // Ritmo: horas ideales según el calendario (lineal entre START_DATE y el fin de la semana 52)
+  const planStart = START_DATE.getTime()
+  const planEnd = weekStart(TOTAL_WEEKS + 1).getTime()
+  const elapsed = Math.min(1, Math.max(0, (Date.now() - planStart) / (planEnd - planStart)))
+  const idealHours = Math.round(elapsed * totalEstimatedHours * 10) / 10
+  const hoursDiff = Math.round((loggedHoursAll - idealHours) * 10) / 10
+  const calendarWeek = Math.min(TOTAL_WEEKS, Math.max(1, Math.floor((Date.now() - planStart) / (7 * 864e5)) + 1))
+  const certsEarned = updatedTasks.filter((t) => t.cert && t.progress === 100).map((t) => t.cert as string)
+
   return {
     ...data,
     tasks: updatedTasks,
     loggedHoursAll,
     progressGeneral,
     currentWeek,
+    calendarWeek,
+    idealHours,
+    hoursDiff,
+    certsEarned,
     remainingWorkingDays,
     completionDate: completionDate.toLocaleDateString("es-ES", {
       year: "numeric",

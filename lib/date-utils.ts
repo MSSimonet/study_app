@@ -1,3 +1,5 @@
+import { START_DATE } from "./constants"
+
 /**
  * Adds working days to a date, skipping weekends
  */
@@ -26,4 +28,18 @@ export function formatHours(hours: number, hoursPerDay: number): string {
     return `${hours} horas (${totalDays} días)`
   }
   return `${hours} horas`
+}
+
+/** Lunes de la semana `week` (1-indexada) del plan */
+export function weekStart(week: number): Date {
+  const d = new Date(START_DATE.getTime())
+  d.setDate(d.getDate() + (week - 1) * 7)
+  return d
+}
+
+/** Clave local YYYY-MM-DD */
+export function dateKey(d: Date = new Date()): string {
+  const mm = String(d.getMonth() + 1).padStart(2, "0")
+  const dd = String(d.getDate()).padStart(2, "0")
+  return `${d.getFullYear()}-${mm}-${dd}`
 }
