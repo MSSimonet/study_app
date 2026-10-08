@@ -1,8 +1,7 @@
 import type { StudyPathData } from "@/lib/types"
 import { ProgressBar } from "@/components/ui/progress-bar"
 import { MetricCard } from "@/components/ui/metric-card"
-import { HOURS_PER_WORKING_DAY, PHASE_MAP, START_DATE } from "@/lib/constants"
-import { formatHours } from "@/lib/date-utils"
+import { PHASE_MAP, START_DATE, TOTAL_WEEKS, phaseOfWeek } from "@/lib/constants"
 import { TodayPanel } from "@/components/today-panel"
 
 interface DashboardViewProps {
@@ -23,16 +22,9 @@ export function DashboardView({ pathData, onLogHours }: DashboardViewProps) {
     currentWeek = 1,
   } = pathData
 
-  const totalWeeks = pathData.tasks.reduce((max, task) => Math.max(max, task.week), 0)
+  const totalWeeks = TOTAL_WEEKS
 
-  const getCurrentPhase = (week: number) => {
-    if (week <= 13) return 1
-    if (week <= 26) return 2
-    if (week <= 39) return 3
-    return 4
-  }
-
-  const currentPhase = getCurrentPhase(currentWeek)
+  const currentPhase = phaseOfWeek(currentWeek)
   const currentPhaseInfo = PHASE_MAP[currentPhase]
 
   return (
@@ -43,10 +35,10 @@ export function DashboardView({ pathData, onLogHours }: DashboardViewProps) {
       <div className="bg-slate-800 p-8 rounded-xl shadow-2xl border-t-4 border-indigo-500">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">Progreso General del Plan</h2>
         <p className="text-slate-400 mb-6">
-          Plan DATA/BI Specialist + Claude y certificaciones - {HOURS_PER_WORKING_DAY} horas por día hábil - {totalWeeks} semanas (desde {START_DATE.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })})
+          Ruta de 18 meses: soporte IT, sistemas y datos - 21 h por semana hasta la semana 39 y 12 h después, más 1–4 h de ampliación - {totalWeeks} semanas (desde {START_DATE.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })})
         </p>
         <ProgressBar
-          label={`${formatHours(loggedHoursAll, HOURS_PER_WORKING_DAY)} completadas de ${formatHours(totalEstimatedHours, HOURS_PER_WORKING_DAY)} en total.`}
+          label={`${Math.round(loggedHoursAll * 10) / 10} horas completadas de ${totalEstimatedHours} en total.`}
           progress={progressGeneral}
           color="indigo-500"
         />
@@ -59,7 +51,7 @@ export function DashboardView({ pathData, onLogHours }: DashboardViewProps) {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <MetricCard title="Carga Semanal Media" value={`${Math.round(totalEstimatedHours / (totalWeeks || 1))} Horas`} icon="⏳" color="purple-500" />
+        <MetricCard title="Carga Semanal Media" value={`${Math.round((totalEstimatedHours / totalWeeks) * 10) / 10} Horas`} icon="⏳" color="purple-500" />
         <MetricCard title="Días Hábiles Restantes" value={remainingWorkingDays} icon="🗓️" color="amber-500" />
         <MetricCard title="Fecha de Fin Proyectada" value={completionDate} icon="🏁" color="emerald-500" />
         <MetricCard title="Semana Actual" value={`Semana ${currentWeek} / ${totalWeeks}`} icon="🗺️" color="sky-500" />
@@ -67,20 +59,13 @@ export function DashboardView({ pathData, onLogHours }: DashboardViewProps) {
 
       <div className="bg-slate-800 p-6 rounded-xl shadow-lg">
         <h3 className="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">Progreso por Fase</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
           {Object.entries(PHASE_MAP).map(([phaseNum, phase]) => {
             const phaseNumber = Number.parseInt(phaseNum)
-            const phaseWeeks =
-              phaseNumber === 1
-                ? { start: 1, end: 13 }
-                : phaseNumber === 2
-                  ? { start: 14, end: 26 }
-                  : phaseNumber === 3
-                    ? { start: 27, end: 39 }
-                    : { start: 40, end: 52 }
+            const phaseWeeks = phase.weeks ? { start: phase.weeks[0], end: phase.weeks[1] } : null
 
-            const phaseTasks = pathData.tasks.filter(
-              (task) => task.week >= phaseWeeks.start && task.week <= phaseWeeks.end,
+            const phaseTasks = pathData.tasks.filter((task) =>
+              phaseWeeks ? !task.track && task.week >= phaseWeeks.start && task.week <= phaseWeeks.end : task.track === "fase7",
             )
             const phaseEstimated = phaseTasks.reduce((sum, task) => sum + task.durationHours, 0)
             const phaseLogged = phaseTasks.reduce((sum, task) => sum + task.loggedHours, 0)
@@ -88,7 +73,7 @@ export function DashboardView({ pathData, onLogHours }: DashboardViewProps) {
 
             const isCurrentPhase = phaseNumber === currentPhase
             const isCompleted = phaseProgress === 100
-            const isFuture = currentWeek < phaseWeeks.start
+            const isFuture = phaseWeeks ? currentWeek < phaseWeeks.start : phaseNumber > currentPhase
 
             return (
               <div
@@ -105,7 +90,7 @@ export function DashboardView({ pathData, onLogHours }: DashboardViewProps) {
               >
                 <div className="text-xs text-slate-400 mb-1">Fase {phaseNum}</div>
                 <div className={`text-sm font-semibold text-${phase.color.split("-")[0]}-400 mb-2`}>
-                  Semanas {phaseWeeks.start}-{phaseWeeks.end}
+                  {phaseWeeks ? `Semanas ${phaseWeeks.start}-${phaseWeeks.end}` : "Sin plazo"}
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-bold text-white">{phaseProgress}%</span>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import type { StudyPathData } from "@/lib/types"
 import { generateStudyPlan, recalculateProgress } from "@/lib/study-plan"
-import { LOCAL_STORAGE_KEY } from "@/lib/constants"
+import { LOCAL_STORAGE_KEY, PLAN_VERSION } from "@/lib/constants"
 import { dateKey } from "@/lib/date-utils"
 
 export function useStudyPath() {
@@ -18,9 +18,16 @@ export function useStudyPath() {
       if (savedData) {
         try {
           const parsed = JSON.parse(savedData) as StudyPathData
+          // Los ids de tarea (semana-posición) cambian con cada plan: las horas de otro plan no se reutilizan,
+          // se guardan aparte y el registro diario (por fecha) se conserva para la racha
+          const samePlan = parsed.planVersion === PLAN_VERSION
+          if (!samePlan && Object.keys(parsed.loggedHours || {}).length > 0) {
+            const backupKey = `${LOCAL_STORAGE_KEY}.plan-v${parsed.planVersion ?? 1}`
+            if (!localStorage.getItem(backupKey)) localStorage.setItem(backupKey, savedData)
+          }
           const mergedPath = {
             ...initialPlan,
-            loggedHours: parsed.loggedHours || {},
+            loggedHours: samePlan ? parsed.loggedHours || {} : {},
             dailyHours: parsed.dailyHours || {},
           }
           setPathData(recalculateProgress(mergedPath))
@@ -44,6 +51,7 @@ export function useStudyPath() {
 
       const dataToSave: StudyPathData = {
         tasks: pathData.tasks,
+        planVersion: PLAN_VERSION,
         totalEstimatedHours: pathData.totalEstimatedHours,
         totalEstimatedWorkingDays: pathData.totalEstimatedWorkingDays,
         loggedHours: newLoggedHours,

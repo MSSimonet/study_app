@@ -3,7 +3,8 @@
 import type { StudyPathData } from "@/lib/types"
 import { HourActionButton } from "@/components/ui/hour-action-button"
 import { weekStart } from "@/lib/date-utils"
-import { PROFILE_MAP, TECH_MAP, CATEGORY_MAP, PHASE_MAP } from "@/lib/constants"
+import { PROFILE_MAP, TECH_MAP, CATEGORY_MAP, PHASE_MAP, TOTAL_WEEKS, phaseOfWeek } from "@/lib/constants"
+import { FASE7_WEEK } from "@/lib/route"
 
 interface StudyPathViewProps {
   pathData: StudyPathData
@@ -21,25 +22,24 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
     return acc
   }, {})
 
-  const getWeekPhase = (week: number) => {
-    if (week <= 13) return 1
-    if (week <= 26) return 2
-    if (week <= 39) return 3
-    return 4
-  }
+  // viernes de la última semana del plan
+  const lastDay = weekStart(TOTAL_WEEKS)
+  lastDay.setDate(lastDay.getDate() + 4)
 
   let currentDisplayPhase = 0
 
   return (
     <div className="p-4 sm:p-8">
       <h2 className="text-3xl font-extrabold text-white mb-6">Ruta de Estudio Detallada</h2>
-      <p className="text-slate-400 mb-8">Plan completo de 52 semanas, del {weekStart(1).toLocaleDateString("es-ES", { month: "long", year: "numeric" })} al {weekStart(53).toLocaleDateString("es-ES", { month: "long", year: "numeric" })} (Lunes a Viernes)</p>
+      <p className="text-slate-400 mb-8">Ruta de {TOTAL_WEEKS} semanas, del {weekStart(1).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })} al {lastDay.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })} (lunes a viernes): empleo remoto en la semana 39 y perfil técnico en crecimiento hasta la 78. La Fase 7 queda sin plazo.</p>
       <div className="space-y-8">
         {Object.values(weeks).map((weekObj) => {
           const isCurrentWeek = weekObj.week === currentWeek
-          const isFutureWeek = weekObj.week > currentWeek
-          const weeklyHoursTotal = weekObj.tasks.reduce((sum, task) => sum + task.durationHours, 0)
-          const weekPhase = getWeekPhase(weekObj.week)
+          const isBacklog = weekObj.week === FASE7_WEEK
+          const isFutureWeek = !isBacklog && weekObj.week > currentWeek
+          const weeklyHoursTotal = weekObj.tasks.reduce((sum, task) => sum + (task.track ? 0 : task.durationHours), 0)
+          const backlogHoursTotal = weekObj.tasks.reduce((sum, task) => sum + (task.track === "fase7" ? task.durationHours : 0), 0)
+          const weekPhase = phaseOfWeek(weekObj.week)
 
           const showPhaseHeader = weekPhase !== currentDisplayPhase
           if (showPhaseHeader) {
@@ -55,12 +55,10 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
                   <h3 className={`text-lg font-bold text-${PHASE_MAP[weekPhase].color.split("-")[0]}-400`}>
                     {PHASE_MAP[weekPhase].name}
                   </h3>
-                  <p className="text-sm text-slate-400 mt-1">
-                    {weekPhase === 1 && "Python, SQL, Excel, Estadística básica, Git, Claude, Google DA (inicio)"}
-                    {weekPhase === 2 && "EDA, Visualización, Power BI, Tableau, Google DA, AI-900, Claude Code"}
-                    {weekPhase === 3 && "ML, Claude API y MCP, Google Advanced DA"}
-                    {weekPhase === 4 && "Big Data, Cloud, IA, PL-300, Portfolio, Job Hunting"}
-                  </p>
+                  <p className="text-sm text-slate-400 mt-1">{PHASE_MAP[weekPhase].summary}</p>
+                  {PHASE_MAP[weekPhase].milestone && (
+                    <p className="text-sm text-slate-300 mt-1 font-semibold">{PHASE_MAP[weekPhase].milestone}</p>
+                  )}
                 </div>
               )}
 
@@ -72,19 +70,21 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className={`text-xl font-bold ${isCurrentWeek ? "text-indigo-300" : "text-white"}`}>
-                    Semana {weekObj.week}
+                    {isBacklog ? "Fase 7 · después de los 18 meses" : `Semana ${weekObj.week}`}
                     <span className="ml-3 text-sm font-normal text-slate-400">
-                      {weekStart(weekObj.week).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}
+                      {isBacklog
+                        ? "sin plazo"
+                        : weekStart(weekObj.week).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
                   </h3>
                   <span className={`text-sm font-semibold ${isCurrentWeek ? "text-indigo-300" : "text-slate-400"}`}>
-                    {weeklyHoursTotal}h (Carga Semanal)
+                    {isBacklog ? `${backlogHoursTotal}h en total` : `${weeklyHoursTotal}h (Carga Semanal)`}
                   </span>
                 </div>
 
                 <div className="space-y-4">
                   {weekObj.tasks.map((task) => {
-                    const isActive = isCurrentWeek
+                    const isActive = isCurrentWeek || isBacklog
                     const isCompleted = task.progress === 100
 
                     const primaryColorKey = task.profile[0] || task.tech[0]
@@ -117,6 +117,26 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
                               >
                                 {CATEGORY_MAP[task.category]?.name}
                               </span>
+                              {task.track === "alt" && (
+                                <span
+                                  title="Alternativa de la Fase 6: haces una de las dos opciones. No suma a las horas del plan"
+                                  className="px-2 py-0.5 rounded-full text-xs font-mono border border-amber-700 text-amber-400"
+                                >
+                                  Alternativa (no suma al plan)
+                                </span>
+                              )}
+                              {task.interest && (
+                                <span
+                                  title="Poca demanda en las ofertas de Galicia y remotas (relevamiento oct 2026): se mantiene con menos horas"
+                                  className={`px-2 py-0.5 rounded-full text-xs font-mono border ${
+                                    task.interest === "baja"
+                                      ? "border-slate-600 text-slate-500"
+                                      : "border-slate-500 text-slate-300"
+                                  }`}
+                                >
+                                  {task.interest === "baja" ? "Interés bajo" : "Interés medio"}
+                                </span>
+                              )}
                               {/* Tech badges */}
                               {task.tech.map((t) => (
                                 <span

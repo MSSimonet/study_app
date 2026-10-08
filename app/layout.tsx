@@ -7,9 +7,9 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Plan de Estudios - DATA/BI Specialist",
+  title: "Plan de Estudios - Soporte IT, Sistemas y Datos",
   description:
-    "Seguimiento de plan de estudio de 52 semanas: Data Analyst + Business Intelligence + ML Aplicado. 3 horas diarias, 15 horas semanales.",
+    "Seguimiento de la ruta de 18 meses (78 semanas): empleo remoto de soporte IT en 9 meses, luego administración de sistemas y datos/BI. 21 horas por semana en la Etapa 1 y 12 en la Etapa 2.",
   icons: {
     icon: [
       {

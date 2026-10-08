@@ -1,7 +1,7 @@
 "use client"
 
 import type { StudyPathData } from "@/lib/types"
-import { CATEGORY_MAP, CERTIFICATIONS, HOURS_PER_WORKING_DAY } from "@/lib/constants"
+import { CATEGORY_MAP, CERTIFICATIONS, hoursPerDay } from "@/lib/constants"
 import { dateKey, weekStart } from "@/lib/date-utils"
 
 interface TodayPanelProps {
@@ -50,7 +50,8 @@ export function TodayPanel({ pathData, onLogHours }: TodayPanelProps) {
     certsEarned = [],
   } = pathData
 
-  const suggested = tasks.find((t) => t.progress < 100)
+  const HOURS_PER_WORKING_DAY = Math.round(hoursPerDay(calendarWeek) * 10) / 10
+  const suggested = tasks.find((t) => !t.track && t.progress < 100)
   const today = hoursOn(dailyHours, new Date())
   const streak = computeStreak(dailyHours)
   const days = lastSevenDays(dailyHours)

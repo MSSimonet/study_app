@@ -1,0 +1,133 @@
+import type { Interest } from "./types"
+
+/**
+ * Módulos de la ruta 2026-27 (ruta_2026_completa.html) que no estaban en el plan de 52 semanas:
+ * cursos Claude/Anthropic y certificaciones (Google DA, AI-901, Google Advanced DA, PL-300).
+ * Cada módulo se reparte en partes iguales sobre un rango de semanas, según el calendario original.
+ *
+ * Los módulos agregados el 7 oct 2026 van al FINAL de MODULES para que los ids ya guardados no cambien
+ * (el id es semana-posición). Cubren las brechas medidas en las ofertas, por prioridad de mercado:
+ * Galicia > remoto Europa > Suiza (ver claude/analisis-mercados-verificado-oct-2026.md en el proyecto).
+ */
+
+export interface ExtraTaskTemplate {
+  name: string
+  durationHours: number
+  category: string
+  tech: string[]
+  profile: string[]
+  links?: string[]
+  cert?: string
+  interest?: Interest
+}
+
+interface ExtraModule {
+  name: string
+  hours: number
+  weeks: [number, number] // rango inclusivo
+  category: string
+  tech?: string[]
+  profile?: string[]
+  url?: string
+  urls?: string[]
+  cert?: string
+  interest?: Interest
+}
+
+// Carga aligerada (oct 2026): el curso de Claude de Platzi dura ~16h reales (4 de video + 12 de práctica)
+// y Google Advanced DA no aparece pedido en las ofertas relevadas; ambos bajan horas con interés "media".
+const MODULES: ExtraModule[] = [
+  // Claude / Anthropic
+  { name: "Curso Claude AI — Platzi", hours: 16, interest: "media", weeks: [1, 8], category: "claude", tech: ["ia"], url: "https://platzi.com/cursos/claude" },
+  { name: "Claude 101 — Anthropic", hours: 3, weeks: [1, 1], category: "claude", tech: ["ia"], url: "https://anthropic.skilljar.com/claude-101" },
+  { name: "AI Fluency: Framework & Foundations", hours: 4, weeks: [2, 2], category: "claude", tech: ["ia"], url: "https://anthropic.skilljar.com/ai-fluency-framework-foundations" },
+  { name: "AI Capabilities and Limitations", hours: 2, weeks: [3, 3], category: "claude", tech: ["ia"], url: "https://anthropic.skilljar.com/ai-capabilities-and-limitations" },
+  { name: "Claude Code 101 — Anthropic", hours: 3, weeks: [10, 10], category: "claude", tech: ["ia"], url: "https://anthropic.skilljar.com/claude-code-101" },
+  { name: "Claude Code in Action", hours: 4, weeks: [11, 11], category: "claude", tech: ["ia"], url: "https://anthropic.skilljar.com/claude-code-in-action" },
+  { name: "Introduction to Agent Skills", hours: 3, weeks: [12, 12], category: "claude", tech: ["ia"], url: "https://anthropic.skilljar.com/introduction-to-agent-skills" },
+  { name: "Introduction to Subagents", hours: 3, weeks: [13, 13], category: "claude", tech: ["ia"], url: "https://anthropic.skilljar.com/introduction-to-subagents" },
+  { name: "Building with Claude API", hours: 8, weeks: [29, 29], category: "claude", tech: ["ia", "python"], url: "https://anthropic.skilljar.com/claude-with-the-anthropic-api" },
+  { name: "Introduction to MCP", hours: 6, weeks: [30, 30], category: "claude", tech: ["ia", "python"], url: "https://anthropic.skilljar.com/introduction-to-model-context-protocol" },
+  { name: "MCP: Advanced Topics", hours: 5, weeks: [31, 31], category: "claude", tech: ["ia", "python"], url: "https://anthropic.skilljar.com/model-context-protocol-advanced-topics" },
+  { name: "Introduction to Claude Cowork", hours: 4, weeks: [42, 42], category: "claude", tech: ["ia"], url: "https://anthropic.skilljar.com/introduction-to-claude-cowork" },
+
+  // Google Data Analytics
+  { name: "Google Data Analytics — Módulo 1", hours: 10, weeks: [7, 9], category: "certificacion", profile: ["da"], url: "https://grow.google/certificates/data-analytics/" },
+  { name: "Google Data Analytics — Módulos 2–8", hours: 80, weeks: [10, 20], category: "certificacion", profile: ["da"], url: "https://grow.google/certificates/data-analytics/", cert: "Google Data Analytics" },
+
+  // Microsoft Azure AI Fundamentals: el examen AI-900 fue reemplazado por AI-901 (página oficial de Microsoft Learn, act. 14 jul 2026)
+  { name: "Microsoft Azure AI Fundamentals (AI-901)", hours: 20, weeks: [14, 17], category: "certificacion", tech: ["cloud", "ia"], url: "https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/", cert: "AI-901 Azure AI Fundamentals" },
+
+  // Google Advanced DA
+  { name: "Google Advanced DA — Preparación", hours: 20, interest: "media", weeks: [22, 28], category: "certificacion", profile: ["da"], url: "https://grow.google/certificates/advanced-data-analytics/" },
+  { name: "Google Advanced DA — Examen", hours: 10, interest: "media", weeks: [41, 42], category: "certificacion", profile: ["da"], url: "https://grow.google/certificates/advanced-data-analytics/", cert: "Google Advanced DA" },
+
+  // Power BI PL-300
+  { name: "PL-300 — Preparación (mocks y laboratorios)", hours: 60, weeks: [33, 41], category: "certificacion", tech: ["powerbi"], profile: ["bi"], url: "https://learn.microsoft.com/en-us/credentials/certifications/exams/pl-300/" },
+  { name: "PL-300 — Rendir examen", hours: 5, weeks: [46, 46], category: "certificacion", tech: ["powerbi"], profile: ["bi"], url: "https://learn.microsoft.com/en-us/credentials/certifications/exams/pl-300/", cert: "PL-300 Power BI" },
+
+  // ── Brechas agregadas el 7 oct 2026 ─────────────────────────────────────────────────────────────
+  // Prioridad 1: Galicia (muestra de 31 ofertas)
+  // Excel requerido en 9 de 31 (y 4 de 22 en Suiza)
+  { name: "Excel avanzado: Power Query, Power Pivot y tablas dinámicas (refuerzo)", hours: 8, weeks: [5, 6], category: "fundamentos", tech: ["excel"], profile: ["da", "bi"], url: "https://platzi.com/cursos/excel-avanzado/" },
+  // Modelado de datos requerido en 5 de 31 (y 6 de 22 en Suiza)
+  { name: "Modelado de datos: esquema estrella y modelo semántico", hours: 10, weeks: [21, 22], category: "bi", tech: ["sql"], profile: ["bi", "da"], url: "https://learn.microsoft.com/es-es/training/modules/design-model-power-bi/" },
+  // Contabilidad, finanzas o control de gestión en 9 de 31 (y 7 de 22 en Suiza)
+  { name: "Contabilidad, finanzas y control de gestión para analistas", hours: 20, weeks: [25, 28], category: "negocio", tech: ["excel"], profile: ["da", "bi"], urls: ["https://platzi.com/cursos/contabilidad-basica/", "https://platzi.com/cursos/planeacion-financiera/"] },
+  // SAP o ERP en 8 de 31 (y 6 de 22 en Suiza)
+  { name: "ERP y SAP para analistas: SAP Analytics Cloud y analítica en S/4HANA", hours: 15, weeks: [29, 31], category: "negocio", profile: ["bi"], urls: ["https://learning.sap.com/courses/exploring-sap-analytics-cloud", "https://learning.sap.com/courses/discovering-sap-s-4hana-embedded-analytics"] },
+  // Power Apps / Power Automate en 2 de 31 (y 2 de 22 en Suiza)
+  { name: "Power Automate: automatización de procesos", hours: 8, weeks: [32, 33], category: "bi", profile: ["bi"], url: "https://learn.microsoft.com/es-es/training/modules/build-microsoft-power-automate-flow/" },
+  // Qlik en 3 de 31 (2 de 22 en Suiza, 2 de 12 remotas)
+  { name: "Qlik Sense: introducción", hours: 6, weeks: [34, 35], category: "bi", profile: ["bi"], url: "https://learning.qlik.com/student/collection/2196958-qlik-sense-business-analyst-free-learning-content" },
+  // Fabric en 2 de 31 (2 de 22 en Suiza, 1 de 12 remotas)
+  { name: "Microsoft Fabric: introducción", hours: 8, weeks: [36, 37], category: "bi", tech: ["cloud"], profile: ["bi"], url: "https://learn.microsoft.com/es-es/training/paths/get-started-fabric/" },
+  // Snowflake/dbt/BigQuery/Databricks en 4 de 31 (2 de 12 remotas)
+  { name: "Stack moderno: dbt con BigQuery y Snowflake (introducción)", hours: 10, weeks: [42, 43], category: "ingenieria", tech: ["sql", "cloud"], profile: ["da", "de"], urls: ["https://docs.getdbt.com/guides/bigquery", "https://docs.snowflake.com/en/user-guide/tutorials/snowflake-in-20minutes"] },
+  // Scrum/Jira en 1 de 31 (y 1 de 22 en Suiza)
+  { name: "Scrum y Jira para proyectos de datos", hours: 3, interest: "media", weeks: [44, 44], category: "empleabilidad", url: "https://scrumguides.org/" },
+  // Prioridad 2: remoto Europa (muestra de 12 ofertas)
+  // Inglés requerido en 12 de 12 (además de +1 h/semana en study-plan.ts). Aptis certifica de A1 a C.
+  { name: "Certificado oficial de inglés multinivel (Aptis, A1–C): preparación y examen", hours: 12, weeks: [48, 49], category: "ingles", url: "https://www.britishcouncil.es/en/exam/aptis/what" },
+  // Calidad de datos en 3 de 12
+  { name: "Calidad de datos: validaciones y tests", hours: 5, weeks: [38, 38], category: "analisis", tech: ["sql"], profile: ["da"], url: "https://docs.getdbt.com/docs/build/data-tests" },
+  // Analítica web/producto: 1 de 12 remotas, 1 de 31 en Galicia, 3 de 22 en Suiza
+  { name: "Analítica de producto y web: GA4, embudos, cohortes y retención", hours: 6, interest: "media", weeks: [34, 35], category: "analisis", profile: ["da"], url: "https://support.google.com/analytics/answer/6367342?hl=es" },
+  // Prioridad 3: Suiza (muestra de 22 ofertas): 15 de 22 piden alemán (B2-C1 o fluido)
+  { name: "Alemán A1 (inicio)", hours: 11, interest: "media", weeks: [42, 52], category: "idiomas", url: "https://a1.vhs-lernportal.de/" },
+]
+
+/** Reparte `total` horas en `parts` partes de múltiplos de 0.5h; la última absorbe el resto. */
+function splitHours(total: number, parts: number): number[] {
+  const base = Math.floor((total / parts) * 2) / 2
+  const result = Array<number>(parts).fill(base)
+  result[parts - 1] = Math.round((total - base * (parts - 1)) * 2) / 2
+  return result
+}
+
+const BY_WEEK: Record<number, ExtraTaskTemplate[]> = {}
+
+for (const m of MODULES) {
+  const [from, to] = m.weeks
+  const parts = to - from + 1
+  const hours = splitHours(m.hours, parts)
+
+  hours.forEach((h, i) => {
+    const week = from + i
+    ;(BY_WEEK[week] ??= []).push({
+      name: parts > 1 ? `${m.name} (${i + 1}/${parts})` : m.name,
+      durationHours: h,
+      category: m.category,
+      tech: m.tech ?? [],
+      profile: m.profile ?? [],
+      links: m.urls ?? (m.url ? [m.url] : undefined),
+      // la certificación se obtiene al completar la última parte
+      cert: i === parts - 1 ? m.cert : undefined,
+      interest: m.interest,
+    })
+  })
+}
+
+export function getExtraTasks(week: number): ExtraTaskTemplate[] {
+  return BY_WEEK[week] ?? []
+}
