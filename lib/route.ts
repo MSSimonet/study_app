@@ -258,7 +258,7 @@ const ETAPA1: Segment[] = [
     weeks: [1, 2],
     cap: 5,
     sequence: [
-      { name: "Platzi «SQL y MySQL» (terminar, estás en la última clase) y sacar el certificado", hours: 1, category: "fundamentos", tech: ["sql"], profile: ["da"], links: ["https://platzi.com/cursos/sql-basico/"], cert: "SQL y MySQL (Platzi)" },
+      { name: "Platzi «SQL y MySQL» (terminar, estás en la última clase) y sacar el certificado", hours: 1, category: "fundamentos", tech: ["sql"], profile: ["da"], links: ["https://platzi.com/cursos/sql-mysql/"], cert: "SQL y MySQL (Platzi)" },
       { name: "Excel Intermedio", hours: 9, category: "fundamentos", tech: ["excel"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/excel-basico/"] },
     ],
   },
