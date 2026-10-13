@@ -5,7 +5,8 @@
       "name": "study-app",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev"],
-      "port": 3000
+      "port": 3005,
+      "autoPort": false
     }
   ]
 }
