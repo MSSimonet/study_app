@@ -2,11 +2,11 @@
 export type Interest = "media" | "baja"
 
 /**
- * Tareas fuera del plan principal de 78 semanas (no suman a horas totales, ritmo ni progreso):
- *  - "alt":   alternativa de la Fase 6 (opción B, ciberseguridad); se hace una de las dos opciones
- *  - "fase7": temas para después de los 18 meses, sin plazo
+ * Tareas fuera del plan fijo de 104 semanas (no suman a horas totales, ritmo ni progreso):
+ *  - "opcional": ampliación de la fase 1 (sección 4.1) y gallego; se ven en su semana y se pueden registrar
+ *  - "fase7":    temas para después de octubre de 2028, sin plazo
  */
-export type TaskTrack = "alt" | "fase7"
+export type TaskTrack = "opcional" | "fase7"
 
 export interface Task {
   id: string

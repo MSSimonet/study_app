@@ -4,8 +4,8 @@ import { addWorkingDays } from "./date-utils"
 import { getRouteTasks, getFase7Tasks, FASE7_WEEK } from "./route"
 
 /**
- * Genera la ruta de 78 semanas (docs/ruta-2026-28.md) más la Fase 7 sin plazo.
- * Las tareas con `track` ("alt" = opción B de la Fase 6, "fase7") van aparte: no suman a horas totales, ritmo ni progreso.
+ * Genera la ruta de 104 semanas (docs/ruta-24-meses-2026-28.md) más la Fase 7 sin plazo.
+ * Las tareas con `track` ("opcional" = ampliación y gallego, "fase7") van aparte: no suman a horas totales, ritmo ni progreso.
  */
 export function generateStudyPlan(): StudyPathData {
   const path: Task[] = []

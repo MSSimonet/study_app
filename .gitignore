@@ -5,6 +5,7 @@
 # Build artifacts
 /.next
 /out
+tsconfig.tsbuildinfo
 
 # Environments
 .env
