@@ -35,7 +35,7 @@ export function DashboardView({ pathData, onLogHours }: DashboardViewProps) {
       <div className="bg-slate-800 p-8 rounded-xl shadow-2xl border-t-4 border-indigo-500">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">Progreso General del Plan</h2>
         <p className="text-slate-400 mb-6">
-          Ruta de 24 meses: soporte y datos en paralelo, después sistemas, datos e idiomas - 15 h fijas por semana (8 en la mudanza, semanas 40–43) más horas opcionales - {totalWeeks} semanas (desde {START_DATE.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })})
+          Ruta de 24 meses: soporte y datos en paralelo, después sistemas, datos e idiomas - 20 h por semana (10 en la mudanza, semanas 40–43) - {totalWeeks} semanas (desde {START_DATE.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })})
         </p>
         <ProgressBar
           label={`${Math.round(loggedHoursAll * 10) / 10} horas completadas de ${totalEstimatedHours} en total.`}

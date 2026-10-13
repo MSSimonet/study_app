@@ -1,8 +1,10 @@
 "use client"
 
 import type { StudyPathData } from "@/lib/types"
-import { CATEGORY_MAP, CERTIFICATIONS, hoursPerDay } from "@/lib/constants"
+import { CATEGORY_MAP, CERTIFICATIONS, START_DATE, hoursPerDay } from "@/lib/constants"
 import { dateKey, weekStart } from "@/lib/date-utils"
+import { getDayPlan, getWeekPlan } from "@/lib/daily-plan"
+import { DayItemView, formatMinutes } from "@/components/week-view"
 
 interface TodayPanelProps {
   pathData: StudyPathData
@@ -61,11 +63,17 @@ export function TodayPanel({ pathData, onLogHours }: TodayPanelProps) {
   const statusText = hoursDiff >= 0 ? `+${hoursDiff}h adelantado` : hoursDiff > -10 ? "En ritmo" : `${Math.abs(hoursDiff)}h atrasado`
   const statusColor = status === "ahead" ? "text-emerald-400" : status === "ontrack" ? "text-sky-400" : "text-rose-400"
 
-  // Meta de hoy: la base diaria, más 1/7 de lo que se debe, con tope de 1 hora extra
-  const goalToday = hoursDiff >= 0 ? HOURS_PER_WORKING_DAY : Math.min(HOURS_PER_WORKING_DAY + Math.abs(hoursDiff) / 7, HOURS_PER_WORKING_DAY + 1)
+  // Plan de hoy (lib/daily-plan.ts); antes del inicio se muestra el primer día
+  const now = new Date()
+  const todayPlan = getDayPlan(now)
+  const planDay = todayPlan ?? (now < START_DATE ? getWeekPlan(1)[0] : null)
+  const taskById = new Map(tasks.map((t) => [t.id, t]))
+
+  // Meta de hoy: lo que pide el plan del día, más 1/7 de lo que se debe, con tope de 1 hora extra
+  const baseToday = todayPlan ? todayPlan.totalMinutes / 60 : HOURS_PER_WORKING_DAY
+  const goalToday = hoursDiff >= 0 ? baseToday : Math.min(baseToday + Math.abs(hoursDiff) / 7, baseToday + 1)
   const goalLabel = Math.round(goalToday * 10) / 10
 
-  const now = new Date()
   const longDate = now.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })
   const wkStart = weekStart(calendarWeek)
   const wkEnd = new Date(wkStart)
@@ -87,6 +95,48 @@ export function TodayPanel({ pathData, onLogHours }: TodayPanelProps) {
           <div className={`text-2xl font-extrabold ${statusColor}`}>{statusText}</div>
         </div>
       </div>
+
+      {planDay && (
+        <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 mb-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-sky-400">
+              🗓️ Plan de hoy
+              {!todayPlan && (
+                <span className="normal-case font-normal text-slate-400">
+                  {" "}
+                  · empieza el {planDay.date.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
+                </span>
+              )}
+            </div>
+            <div className="text-xs text-slate-400">
+              Semana {planDay.week} · {formatMinutes(planDay.totalMinutes)}
+            </div>
+          </div>
+          <ul className="space-y-3">
+            {planDay.items.map((item, i) => {
+              const task = taskById.get(item.taskId)
+              return (
+                <DayItemView
+                  key={i}
+                  item={item}
+                  action={
+                    todayPlan && (
+                      <button
+                        onClick={() => onLogHours(item.taskId, item.minutes / 60)}
+                        disabled={!task || task.progress === 100}
+                        title="Registra estos minutos en la tarea"
+                        className="shrink-0 px-2 py-1 rounded-md text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-40"
+                      >
+                        {task?.progress === 100 ? "✓" : `+${item.minutes} min`}
+                      </button>
+                    )
+                  }
+                />
+              )
+            })}
+          </ul>
+        </div>
+      )}
 
       {suggested ? (
         <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 mb-5">

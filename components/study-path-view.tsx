@@ -31,7 +31,7 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
   return (
     <div className="p-4 sm:p-8">
       <h2 className="text-3xl font-extrabold text-white mb-6">Ruta de Estudio Detallada</h2>
-      <p className="text-slate-400 mb-8">Ruta de {TOTAL_WEEKS} semanas, del {weekStart(1).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })} al {lastDay.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}: 15 h fijas por semana (8 en la mudanza, semanas 40–43) más las opcionales; primer empleo hacia la semana 39 y alemán B1 en la 104. La Fase 7 queda sin plazo.</p>
+      <p className="text-slate-400 mb-8">Ruta de {TOTAL_WEEKS} semanas, del {weekStart(1).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })} al {lastDay.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}: 20 h por semana (10 en la mudanza, semanas 40–43); primer empleo hacia la semana 39, Aptis B2 en la 78 y alemán A2 en la 104. El reparto por días está en la pestaña Semana. La Fase 7 queda sin plazo.</p>
       <div className="space-y-8">
         {Object.values(weeks).map((weekObj) => {
           const isCurrentWeek = weekObj.week === currentWeek
