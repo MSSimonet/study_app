@@ -5,7 +5,8 @@ import { getRouteTasks, getFase7Tasks, FASE7_WEEK } from "./route"
 
 /**
  * Genera la ruta de 104 semanas (docs/ruta-24-meses-2026-28.md) más la Fase 7 sin plazo.
- * Las tareas con `track` ("opcional" = ampliación y gallego, "fase7") van aparte: no suman a horas totales, ritmo ni progreso.
+ * Las tareas con `track` ("fase7" y, si las hubiera, "opcional") van aparte: no suman a horas totales, ritmo ni progreso.
+ * La ampliación y el gallego son fijos desde la versión 3 de la ruta.
  */
 export function generateStudyPlan(): StudyPathData {
   const path: Task[] = []

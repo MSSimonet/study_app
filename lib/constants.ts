@@ -1,10 +1,10 @@
 import type { ColorConfig } from "./types"
 import { getWeeklyHours } from "./route"
 
-// Ruta de 24 meses v2.1 (docs/ruta-24-meses-2026-28.md): 15 h fijas por semana, salvo 8 h en la mudanza (semanas 40–43).
-// Las horas opcionales (ampliación y gallego) no cuentan; las horas reales de cada semana salen del plan (ver lib/route.ts).
+// Ruta de 24 meses v3 (docs/ruta-24-meses-2026-28.md): 20 h fijas por semana, salvo 10 h en la mudanza (semanas 40–43).
+// Las horas reales de cada semana salen del plan (ver lib/route.ts) y su reparto por días, de lib/daily-plan.ts.
 export const TOTAL_WEEKS = 104
-export const HOURS_PER_WEEK = 15
+export const HOURS_PER_WEEK = 20
 
 /** Horas por día hábil (lunes a viernes) de una semana, según lo planificado en ella */
 export function hoursPerDay(week: number): number {
@@ -15,7 +15,7 @@ export function hoursPerDay(week: number): number {
 export const START_DATE = new Date(2026, 9, 20)
 export const LOCAL_STORAGE_KEY = "studyPathLocal"
 /** Sube cuando cambian los ids de las tareas (semana-posición), para no mezclar horas guardadas de otro plan */
-export const PLAN_VERSION = 4
+export const PLAN_VERSION = 5
 
 export const PROFILE_MAP: Record<string, ColorConfig> = {
   it: { name: "Soporte IT", color: "amber-500" },
@@ -64,21 +64,22 @@ export const CATEGORY_MAP: Record<string, ColorConfig> = {
   idiomas: { name: "Otros idiomas", color: "rose-600" },
 }
 
-/** En orden de la ruta; desde "ITIL 4 Foundation" son de la Fase 7 (opcionales o sin fecha) */
+/** En orden de la ruta (Aptis en la semana 78, AZ-104 en la 88, alemán A2 en la 104); desde "ITIL Foundation" son de la Fase 7 */
 export const CERTIFICATIONS = [
   "SQL y MySQL (Platzi)",
   "Inglés A2 (Platzi)",
   "MD-102",
   "PL-300 Power BI",
-  "AZ-104 Azure Administrator",
   "Aptis B2",
-  "Alemán B1 (ÖSD o Goethe)",
-  "ITIL 4 Foundation",
+  "AZ-104 Azure Administrator",
+  "Alemán A2 (opcional)",
+  "ITIL Foundation",
   "AZ-900 Azure Fundamentals",
   "AB-900",
   "AI-901 Azure AI Fundamentals",
   "Google Data Analytics",
   "Google Advanced DA",
+  "Alemán B1 (ÖSD o Goethe)",
 ]
 
 export interface PhaseInfo {
@@ -96,7 +97,7 @@ export const PHASE_MAP: Record<number, PhaseInfo> = {
     color: "indigo-500",
     weeks: [1, 26],
     summary:
-      "Hardware, sistemas operativos, redes, GLPI, Active Directory, PowerShell y M365 (P1, P2) · Excel, SQL y Power BI (P4a, P4b) · inglés hacia B1 · CV, LinkedIn y postulaciones desde la semana 9 · opcional: Git, Claude y SQL avanzado",
+      "Hardware, sistemas operativos, redes, seguridad básica, GLPI, Active Directory, PowerShell, M365 e Intune (P1, P2) · Excel, SQL, Power BI y DAX (P4a, P4b) · inglés hacia B1 · CV, LinkedIn y postulaciones desde la semana 9 · Git, Claude y SQL avanzado",
     milestone: "Semana 26: P1, P2 v1, P4a v1 y P4b publicados; punto de control de inglés B1",
   },
   2: {
@@ -104,7 +105,7 @@ export const PHASE_MAP: Record<number, PhaseInfo> = {
     color: "sky-500",
     weeks: [27, 39],
     summary:
-      "Career Path de Cisco, 10 incidencias y 5 artículos, P3 en Packet Tracer, Linux Unhatched, P1 con scripts · SQL en HackerRank y LeetCode, P4a v2 · 10 postulaciones por semana, simulacros sin IA, Scrum y Jira · opcional: portfolio web y contabilidad",
+      "Career Path de Cisco, 10 incidencias y 5 artículos, P3 en Packet Tracer, Linux, Intune, P1 con scripts · SQL en HackerRank y LeetCode, P4a v2 · 10 postulaciones por semana, simulacros sin IA, Scrum y Jira · portfolio web",
     milestone: "Semana 39: P1–P4 publicados, inglés B1, 150–250 postulaciones; idealmente, primer empleo",
   },
   3: {
@@ -112,35 +113,35 @@ export const PHASE_MAP: Record<number, PhaseInfo> = {
     color: "violet-500",
     weeks: [40, 60],
     summary:
-      "Semanas 40–43 a 8 h: trámites en Galicia y postulaciones · MD-102 (Intune) · Power BI avanzado, modelo estrella y ruta del PL-300 · alemán A1 desde la semana 44 · gallego opcional",
+      "Semanas 40–43 a 10 h: trámites en Galicia y postulaciones · MD-102 (Intune) y Seguridad de Terminales · Power BI avanzado, contabilidad, ERP/SAP y Power Automate · alemán A1 y gallego desde la semana 44",
     milestone: "Semana 60: examen MD-102",
   },
   4: {
     name: "FASE 4: Servidores y PL-300",
     color: "fuchsia-500",
     weeks: [61, 69],
-    summary: "Windows Server avanzado, Entra Connect, PowerShell intermedio y P2 v2 · PL-300 · alemán A1 → A2",
+    summary: "Windows Server avanzado, Entra Connect, PowerShell intermedio, P2 v2 y AZ-900 · PL-300 · alemán A1 → A2",
     milestone: "Semana 69: examen PL-300",
   },
   5: {
     name: "FASE 5: Azure, Python e inglés B2",
     color: "cyan-500",
     weeks: [70, 91],
-    summary: "AZ-104 y Linux Essentials desde la semana 89 · Python con pandas · alemán A2 → B1 · Aptis B2",
-    milestone: "Semana 88: examen AZ-104 · semana 91: Aptis B2",
+    summary: "ITIL, AZ-104, Azure IaaS y Linux Essentials · Python con pandas, BI, Fabric, Qlik y Excel con Python · Aptis B2 · alemán A2",
+    milestone: "Semana 78: Aptis B2 · semana 88: examen AZ-104",
   },
   6: {
-    name: "FASE 6: Linux, proyecto de datos y alemán B1",
+    name: "FASE 6: Linux, redes y proyecto integrador",
     color: "emerald-500",
     weeks: [92, 104],
-    summary: "Linux Essentials · proyecto Python + SQL con EDA · CV para España y Viena · alemán B1",
-    milestone: "Semana 104: examen de alemán B1",
+    summary: "Linux Essentials, AWS y Cisco Técnico en Redes · proyecto Python + SQL con EDA, Tableau, storytelling y proyecto integrador de BI · CV para España y Viena · alemán A2",
+    milestone: "Semana 104: examen de alemán A2 (opcional)",
   },
   7: {
     name: "FASE 7: Después de octubre de 2028 (sin plazo)",
     color: "rose-500",
     summary:
-      "En el orden de la ruta: BI en Galicia (ERP/SAP, Power Automate, Fabric, Qlik), sistemas (ITIL, seguridad, opción A o B, AWS), datos (visualización, Tableau, Looker, Google DA, estadística, ML, Big Data) e IA (Claude Code, API, MCP y agentes); al final, empleo, francés y cursos en pausa",
+      "En el orden de la ruta: sistemas (resto de Técnico en Redes, CCNA, ciberseguridad, exámenes opcionales), datos (Google DA, estadística, Looker, calidad de datos, dbt, ML, Big Data), IA (Claude Code, API, MCP, agentes, AI-901) y otros (empleo, francés, alemán B1, cursos en pausa)",
   },
 }
 

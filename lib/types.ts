@@ -2,8 +2,9 @@
 export type Interest = "media" | "baja"
 
 /**
- * Tareas fuera del plan fijo de 104 semanas (no suman a horas totales, ritmo ni progreso):
- *  - "opcional": ampliación de la fase 1 (sección 4.1) y gallego; se ven en su semana y se pueden registrar
+ * Tareas fuera del plan de 104 semanas (no suman a horas totales, ritmo ni progreso):
+ *  - "opcional": tareas que se ven en su semana y se pueden registrar sin contar en el plan; desde la versión 3 de la ruta
+ *                no hay ninguna (la ampliación y el gallego son fijos)
  *  - "fase7":    temas para después de octubre de 2028, sin plazo
  */
 export type TaskTrack = "opcional" | "fase7"

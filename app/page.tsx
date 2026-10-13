@@ -4,10 +4,11 @@ import { useState } from "react"
 import { useStudyPath } from "@/hooks/use-study-path"
 import { DashboardView } from "@/components/dashboard-view"
 import { StudyPathView } from "@/components/study-path-view"
+import { WeekView } from "@/components/week-view"
 
 export default function Home() {
   const { pathData, isLoading, logHours } = useStudyPath()
-  const [view, setView] = useState<"dashboard" | "study">("dashboard")
+  const [view, setView] = useState<"dashboard" | "study" | "week">("dashboard")
 
   if (isLoading || !pathData) {
     return (
@@ -43,6 +44,16 @@ export default function Home() {
             >
               Ruta
             </button>
+            <button
+              onClick={() => setView("week")}
+              className={`px-3 py-2 sm:px-4 rounded-lg font-semibold text-sm transition duration-200 ${
+                view === "week"
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/50"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+              }`}
+            >
+              Semana
+            </button>
           </nav>
         </div>
       </header>
@@ -50,6 +61,8 @@ export default function Home() {
       <main className="max-w-7xl mx-auto">
         {view === "dashboard" ? (
           <DashboardView pathData={pathData} onLogHours={logHours} />
+        ) : view === "week" ? (
+          <WeekView pathData={pathData} />
         ) : (
           <StudyPathView pathData={pathData} onLogHours={logHours} />
         )}
