@@ -30,7 +30,7 @@ export function formatHours(hours: number, hoursPerDay: number): string {
   return `${hours} horas`
 }
 
-/** Lunes de la semana `week` (1-indexada) del plan */
+/** Primer día de la semana (START_DATE, martes 20/10/2026) `week` (1-indexada) del plan */
 export function weekStart(week: number): Date {
   const d = new Date(START_DATE.getTime())
   d.setDate(d.getDate() + (week - 1) * 7)

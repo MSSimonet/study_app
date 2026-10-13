@@ -1,17 +1,23 @@
 import type { Interest, TaskTrack } from "./types"
 
 /**
- * Ruta de 18 meses (docs/ruta-2026-28.md): empleo remoto en 9 meses y perfil técnico en crecimiento.
- * Inicio lunes 12/10/2026 · objetivo de empleo semana 39 (09/07/2027) · fin viernes 07/04/2028 (semana 78).
+ * Ruta de 24 meses v2.1 (docs/ruta-24-meses-2026-28.md): soporte y datos en paralelo desde la semana 1 para el primer
+ * empleo, mudanza a Galicia en las semanas 40–43 y alemán desde la semana 44.
+ * Inicio lunes 20/10/2026 · primer empleo hacia la semana 39 · fin viernes 16/10/2028 (semana 104).
  *
- * Los plazos son los de la ruta: fases, semanas de examen e hitos. Cada bloque tiene una capacidad
- * semanal fija (Etapa 1: 21 h = inglés 7 + soporte 7/6 + datos 5/4 + empleo 2/3/4; Etapa 2: 12 h = inglés 4 +
- * soporte 5 + datos 3). Dentro de cada tramo, los módulos "weekly" se repiten cada semana y los "sequence"
- * se vierten en orden sobre las horas que quedan. Si un tramo no cuadra, el módulo falla al cargar.
+ * Cada bloque tiene una capacidad semanal fija (secciones 3 y 4 del doc):
+ *  - Semanas 1–26:   soporte 5 + datos 3 + inglés 5 + empleo 2 = 15 h
+ *  - Semanas 27–39:  soporte 4 + datos 2 + inglés 5 + empleo 4 = 15 h
+ *  - Semanas 40–43:  sistemas 4 + datos 2 + inglés 2 = 8 h (mudanza)
+ *  - Semanas 44–69:  sistemas 5 + datos 3 + inglés 3 + alemán 4 = 15 h
+ *  - Semanas 70–91:  sistemas 4 + datos 2 + inglés 3 + alemán 6 = 15 h
+ *  - Semanas 92–104: sistemas 4 + datos 2 + inglés 2 + alemán 7 = 15 h
+ * Total fijo: 1.532 h. Dentro de cada tramo, los módulos "weekly" se repiten cada semana y los "sequence" se vierten en
+ * orden sobre las horas que quedan. Si un tramo no cuadra, el módulo falla al cargar.
  *
- * Además de los cuatro bloques de la ruta, el bloque «ampliacion» suma entre 1 y 4 h por semana con temas del repo
- * que la ruta no traía (Git, SQL avanzado, visualización y EDA, BI estratégico, portfolio, práctica de coding y cursos
- * de Claude). Cada uno entra justo después de su base, para ir profundizando; los plazos de la ruta no se mueven.
+ * El bloque «ampliacion» es opcional (track "opcional": no suma al total ni al ritmo): los temas del repo que la ruta
+ * ubica en las horas opcionales de la fase 1 (sección 4.1, 91 h, con la semana en 19 h como máximo) y el gallego,
+ * 1 h por semana desde la semana 44 (61 h). Lo que no entra en los 24 meses va a la Fase 7, en el orden de la sección 4.1.
  */
 
 export interface RouteItem {
@@ -37,8 +43,8 @@ export interface RouteTask {
   track?: TaskTrack
 }
 
-type Block = "ingles" | "soporte" | "datos" | "empleo" | "ampliacion"
-const BLOCK_ORDER: Block[] = ["ingles", "soporte", "datos", "empleo", "ampliacion"]
+type Block = "ingles" | "aleman" | "soporte" | "datos" | "empleo" | "ampliacion"
+const BLOCK_ORDER: Block[] = ["ingles", "aleman", "soporte", "datos", "empleo", "ampliacion"]
 
 interface Segment {
   block: Block
@@ -49,327 +55,250 @@ interface Segment {
   weekly?: RouteItem[]
   /** módulos en orden; las horas son el total y se reparten en las semanas */
   sequence?: RouteItem[]
-  /** alternativa a `sequence` en las mismas semanas (no cuenta en el total de horas) */
-  alt?: RouteItem[]
+  /** "opcional": se ve en la semana y se puede registrar, pero no suma al total ni al ritmo */
+  track?: TaskTrack
 }
 
 /** Semana a la que van las tareas de la Fase 7 (sin plazo) */
-export const FASE7_WEEK = 79
+export const FASE7_WEEK = 105
 
 const NETACAD_IT = "https://www.netacad.com/es/catalogs/learn/information-technology"
 const NETACAD_NET = "https://www.netacad.com/es/catalogs/learn/networking"
 const NETACAD_SEC = "https://www.netacad.com/es/catalogs/learn/cybersecurity"
+const PACKET_TRACER = "https://www.netacad.com/cisco-packet-tracer"
 const PLATZI_ING = "https://platzi.com/escuela/ingles/"
+const VHS = "https://www.vhs-lernportal.de/"
+const APTIS = "https://www.britishcouncil.es/eu/azterketak/aptis/datak-prezioak-tokiak"
+const OSD = "https://sprachenzentrum.univie.ac.at/en/language-university/oesd-examinations"
+const GLPI = "https://github.com/glpi-project/docker-images"
+const AB900 = "https://learn.microsoft.com/en-us/credentials/certifications/exams/ab-900/"
+const MD102 = "https://learn.microsoft.com/en-us/credentials/certifications/modern-desktop/"
+const PL300 = "https://learn.microsoft.com/en-us/credentials/certifications/exams/pl-300/"
+const AZ104 = "https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/"
+const AZ900 = "https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/"
 const JOBS = [
   "https://www.tecnoempleo.com/ofertas-trabajo/?te=helpdesk",
   "https://www.remoterocketship.com/country/argentina/jobs/it-support/",
   "https://www.remoterocketship.com/country/argentina/jobs/technical-support/",
 ]
+const JOBS_ES = ["https://www.tecnoempleo.com/ofertas-trabajo/?te=soporte", "https://www.tecnoempleo.com/ofertas-trabajo/?te=helpdesk"]
 
-// ───────────────────────────── ETAPA 1 · semanas 1–39 · 21 h por semana ─────────────────────────────
+// ───────────────────────────── FASE 1 · semanas 1–39 · 15 h fijas por semana ─────────────────────────────
 
-const ETAPA1: Segment[] = [
-  // ── Inglés (7 h) ──
+const FASE1: Segment[] = [
+  // ── Inglés (5 h) ──
   {
     block: "ingles",
-    weeks: [1, 13],
-    cap: 7,
+    weeks: [1, 39],
+    cap: 5,
     weekly: [
-      { name: "Inglés: Platzi English Academy A2", hours: 3, category: "ingles", links: [PLATZI_ING], cert: "Inglés A2 (Platzi)" },
-      { name: "Inglés: Sesame, conversación diaria", hours: 2, category: "ingles" },
-      { name: "Inglés: English Discoveries (test de nivel la semana 1 y práctica mientras seas elegible)", hours: 1, category: "ingles" },
+      { name: "Inglés: Sesame, 15–20 min por día (llamadas de soporte y entrevistas)", hours: 1.5, category: "ingles" },
+      { name: "Inglés: producción técnica (escribir en inglés los tickets y artículos del laboratorio)", hours: 1, category: "ingles" },
+      { name: "Inglés: escucha (Microsoft Learn y Cisco en inglés, o Little Language Lessons)", hours: 0.5, category: "ingles" },
     ],
     sequence: [
+      { name: "Inglés: test de nivel en English Discoveries", hours: 1, category: "ingles" },
       { name: "Inglés: Platzi «Inglés para Programadores» (terminar, vas 9/13)", hours: 5, category: "ingles", links: [PLATZI_ING] },
-      { name: "Inglés: Little Language Lessons", hours: 8, category: "ingles" },
-    ],
-  },
-  {
-    block: "ingles",
-    weeks: [14, 26],
-    cap: 7,
-    weekly: [
-      { name: "Inglés: Platzi B1", hours: 3, category: "ingles", links: [PLATZI_ING] },
-      { name: "Inglés: Sesame", hours: 2, category: "ingles" },
-      { name: "Inglés: English Discoveries y Little Language Lessons", hours: 1, category: "ingles" },
-    ],
-    sequence: [
+      { name: "Inglés: Platzi English Academy A2 (terminar, vas al 27 %)", hours: 26, category: "ingles", links: [PLATZI_ING], cert: "Inglés A2 (Platzi)" },
       { name: "Inglés: Platzi «Inglés para Entrevistas de Trabajo»", hours: 6, category: "ingles", links: [PLATZI_ING] },
       { name: "Inglés: Platzi «Inglés para Servicio al Cliente»", hours: 7, category: "ingles", links: [PLATZI_ING] },
-    ],
-  },
-  {
-    block: "ingles",
-    weeks: [27, 39],
-    cap: 7,
-    weekly: [
-      { name: "Inglés: Platzi B1", hours: 3, category: "ingles", links: [PLATZI_ING] },
-      { name: "Inglés: Sesame, simulacros de entrevista en inglés", hours: 2, category: "ingles" },
-    ],
-    sequence: [
-      { name: "Inglés: preparación de Aptis", hours: 20, category: "ingles", links: ["https://www.britishcouncil.es/en/exam/aptis/what"] },
-      {
-        name: "Inglés: examen Aptis opcional (semanas 37–38), certifica tu nivel actual",
-        hours: 4,
-        category: "ingles",
-        links: ["https://www.britishcouncil.es/eu/azterketak/aptis/datak-prezioak-tokiak"],
-        cert: "Aptis (nivel actual, opcional)",
-      },
-      { name: "Inglés: repaso de inglés técnico para entrevistas", hours: 2, category: "ingles" },
+      { name: "Inglés: Platzi English Academy B1 (inicio)", hours: 6, category: "ingles", links: [PLATZI_ING] },
+      // cae en la semana 26
+      { name: "Inglés: punto de control B1 en English Discoveries o Platzi (un Aptis para medir nivel es opcional; no hace falta)", hours: 1, category: "ingles" },
+      { name: "Inglés: Platzi English Academy B1 (continuación)", hours: 26, category: "ingles", links: [PLATZI_ING] },
     ],
   },
 
-  // ── Soporte y sistemas (7 h en Fases 1–2, 6 h en Fase 3) ──
+  // ── Soporte (5 h en las semanas 1–26, 4 h en las 27–39) ──
   {
     block: "soporte",
-    weeks: [1, 2],
-    cap: 7,
+    weeks: [1, 13],
+    cap: 5,
     sequence: [
       { name: "Platzi «Computadores e Informática» (terminar, vas 16/26)", hours: 3, category: "soporte", profile: ["it"], links: ["https://platzi.com/cursos/computacion-basica/"] },
       { name: "Platzi «Terminal» (terminar, vas 23/26)", hours: 1, category: "soporte", profile: ["it"], tech: ["linux"], links: ["https://platzi.com/cursos/terminal/"] },
       { name: "Cisco: Hardware Basics", hours: 6, category: "soporte", profile: ["it"], links: [NETACAD_IT] },
-      { name: "Cisco: IT Customer Support Basics", hours: 4, category: "soporte", profile: ["it"], links: [NETACAD_IT] },
-    ],
-  },
-  {
-    block: "soporte",
-    weeks: [3, 5],
-    cap: 7,
-    sequence: [
       { name: "Cisco: Operating Systems Basics", hours: 12, category: "soporte", profile: ["it"], tech: ["windows"], links: [NETACAD_IT] },
-      { name: "Cisco: Linux Unhatched", hours: 8, category: "soporte", profile: ["it"], tech: ["linux"], links: [NETACAD_IT] },
-      { name: "Práctica de sistemas operativos y Linux en máquina virtual", hours: 1, category: "practica", profile: ["it"], tech: ["linux"] },
-    ],
-  },
-  {
-    block: "soporte",
-    weeks: [6, 9],
-    cap: 7,
-    sequence: [
+      { name: "Cisco: IT Customer Support Basics", hours: 4, category: "soporte", profile: ["it"], links: [NETACAD_IT] },
       { name: "Cisco: Conceptos básicos de redes", hours: 22, category: "soporte", profile: ["it"], tech: ["redes"], links: [NETACAD_NET] },
-      { name: "Platzi «Redes Informáticas de Internet»", hours: 6, category: "soporte", profile: ["it"], tech: ["redes"], links: ["https://platzi.com/cursos/redes/"] },
-    ],
-  },
-  {
-    block: "soporte",
-    weeks: [10, 13],
-    cap: 7,
-    sequence: [
-      { name: "AZ-900: curso de Platzi", hours: 5, category: "certificacion", profile: ["it", "sys"], tech: ["cloud"], links: ["https://platzi.com/cursos/az-900/"] },
-      { name: "AZ-900: práctica", hours: 20, category: "certificacion", profile: ["it", "sys"], tech: ["cloud"], links: ["https://platzi.com/cursos/az-900/"] },
       {
-        name: "AZ-900: guía de Microsoft Learn",
-        hours: 2,
-        category: "certificacion",
+        name: "Preparar el host: ¿Windows Home? (sin Hyper-V → VirtualBox 7.2), Ubuntu Server 26.04 en VM con práctica de Linux, y descargar las evaluaciones de Windows Server 2025 y Windows 11 (se instalan en la semana 14)",
+        hours: 5,
+        category: "practica",
         profile: ["it", "sys"],
-        tech: ["cloud"],
-        links: ["https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/"],
+        tech: ["linux", "windows"],
+        links: ["https://www.virtualbox.org/wiki/Downloads", "https://ubuntu.com/download/server"],
       },
-      {
-        name: "AZ-900: examen (semana 13)",
-        hours: 1,
-        category: "certificacion",
-        profile: ["it", "sys"],
-        tech: ["cloud"],
-        links: ["https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/"],
-        cert: "AZ-900 Azure Fundamentals",
-      },
+      { name: "GLPI en Docker (glpi/glpi): categorías, prioridades, SLA y base de conocimiento", hours: 9, category: "practica", profile: ["it"], links: [GLPI] },
+      { name: "Práctica en Packet Tracer", hours: 3, category: "practica", profile: ["it"], tech: ["redes"], links: [PACKET_TRACER] },
     ],
   },
   {
     block: "soporte",
     weeks: [14, 17],
-    cap: 7,
+    cap: 5,
     sequence: [
-      // El curso dura 30 h según la ruta; se cuentan 28 h porque parte se solapa con módulos ya hechos en la Fase 1
-      { name: "Cisco: IT Support Specialist Career Path", hours: 28, category: "soporte", profile: ["it"], links: [NETACAD_IT] },
-    ],
-  },
-  {
-    block: "soporte",
-    weeks: [18, 23],
-    cap: 7,
-    sequence: [
-      { name: "Laboratorio en casa: Windows Server de prueba en VirtualBox", hours: 8, category: "practica", profile: ["it", "sys"], tech: ["windows"] },
-      { name: "Laboratorio en casa: Active Directory", hours: 10, category: "practica", profile: ["it", "sys"], tech: ["windows"] },
-      { name: "Laboratorio en casa: directivas de grupo (GPO)", hours: 8, category: "practica", profile: ["it", "sys"], tech: ["windows"] },
-      { name: "Laboratorio en casa: DNS y DHCP", hours: 8, category: "practica", profile: ["it", "sys"], tech: ["windows", "redes"] },
-      { name: "Laboratorio en casa: GLPI como sistema de tickets", hours: 5, category: "practica", profile: ["it"] },
-      { name: "Laboratorio en casa: documentación completa en GitHub", hours: 3, category: "practica", profile: ["it", "sys"] },
-    ],
-  },
-  {
-    block: "soporte",
-    weeks: [24, 26],
-    cap: 7,
-    sequence: [
-      { name: "Platzi «Azure Active Directory»", hours: 8, category: "sistemas", profile: ["it", "sys"], tech: ["windows", "cloud"], links: ["https://platzi.com/escuela/devops-cloud/"] },
-      { name: "Platzi «Microsoft 365 Copilot»", hours: 3, category: "sistemas", profile: ["it"], tech: ["windows", "ia"], links: ["https://platzi.com/escuela/devops-cloud/"] },
       {
-        name: "AB-900: preparación (Microsoft Learn)",
-        hours: 8,
-        category: "certificacion",
+        name: "P1 · Pyme Ficticia: controlador de dominio en Windows Server 2025 Core (2 GB) con DNS y DHCP",
+        hours: 6,
+        category: "practica",
+        profile: ["it", "sys"],
+        tech: ["windows", "redes"],
+        links: ["https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2025"],
+      },
+      { name: "P1: unidades organizativas, usuarios, grupos y GPO (unidades de red, contraseñas, bloqueo de pantalla)", hours: 7, category: "practica", profile: ["it", "sys"], tech: ["windows"] },
+      {
+        name: "P1: cliente Windows 11 (4 GB, vTPM) unido al dominio",
+        hours: 4,
+        category: "practica",
         profile: ["it"],
         tech: ["windows"],
-        links: ["https://learn.microsoft.com/en-us/credentials/certifications/exams/ab-900/"],
+        links: ["https://www.microsoft.com/en-us/evalcenter/evaluate-windows-11-enterprise"],
+      },
+      { name: "P1 v1: README, diagrama de red y publicación en GitHub", hours: 3, category: "practica", profile: ["it", "sys"] },
+    ],
+  },
+  {
+    block: "soporte",
+    weeks: [18, 22],
+    cap: 5,
+    sequence: [
+      { name: "PowerShell básico con el módulo de Active Directory", hours: 9, category: "sistemas", profile: ["it", "sys"], tech: ["windows", "linux"] },
+      { name: "P2 v1: altas y bajas desde un CSV de RRHH con PowerShell (usuarios, grupos, carpetas y logs), publicado", hours: 8, category: "practica", profile: ["it", "sys"], tech: ["windows", "linux"] },
+      { name: "Microsoft 365 y Entra ID: guía de AB-900 en Microsoft Learn (sin examen)", hours: 8, category: "sistemas", profile: ["it"], tech: ["windows", "cloud"], links: [AB900] },
+    ],
+  },
+  {
+    block: "soporte",
+    weeks: [23, 26],
+    cap: 5,
+    sequence: [
+      { name: "ITSM: incidente, problema, cambio y SLA", hours: 3, category: "soporte", profile: ["it"] },
+      { name: "P1: primeras 5 incidencias simuladas, cada una con su ticket en GLPI", hours: 5, category: "practica", profile: ["it"] },
+      { name: "Cisco: IT Support Specialist Career Path (parte 1 de 30 h)", hours: 12, category: "soporte", profile: ["it"], links: [NETACAD_IT] },
+    ],
+  },
+  {
+    block: "soporte",
+    weeks: [27, 39],
+    cap: 4,
+    sequence: [
+      { name: "Cisco: IT Support Specialist Career Path (resto)", hours: 18, category: "soporte", profile: ["it"], links: [NETACAD_IT] },
+      {
+        name: "P1: 5 incidencias más (10 en total) con diagnóstico, causa raíz y solución, y 5 artículos de conocimiento en español e inglés",
+        hours: 10,
+        category: "practica",
+        profile: ["it"],
       },
       {
-        name: "AB-900: examen (semana 26)",
-        hours: 2,
-        category: "certificacion",
+        name: "P3 · Red de oficina en Packet Tracer: 2 VLAN, DHCP, DNS, salida simulada, 5 fallos inyectados y vídeo de 3–5 min en inglés",
+        hours: 12,
+        category: "practica",
         profile: ["it"],
-        tech: ["windows"],
-        links: ["https://learn.microsoft.com/en-us/credentials/certifications/exams/ab-900/"],
-        cert: "AB-900",
+        tech: ["redes"],
+        links: [PACKET_TRACER],
       },
-    ],
-  },
-  {
-    block: "soporte",
-    weeks: [27, 30],
-    cap: 6,
-    sequence: [
-      { name: "PowerShell básico: automatizar altas de usuarios en el laboratorio", hours: 18, category: "sistemas", profile: ["it", "sys"], tech: ["windows", "linux"] },
-      { name: "Platzi «Servidores Linux» (4 h de curso + 2 h de práctica)", hours: 6, category: "sistemas", profile: ["sys"], tech: ["linux"], links: ["https://platzi.com/escuela/devops-cloud/"] },
-    ],
-  },
-  {
-    block: "soporte",
-    weeks: [31, 36],
-    cap: 6,
-    sequence: [
-      { name: "Cisco: Introducción a Ciberseguridad", hours: 6, category: "seguridad", profile: ["it", "sys"], tech: ["seguridad"], links: [NETACAD_SEC] },
-      { name: "Cisco: Seguridad de Terminales", hours: 27, category: "seguridad", profile: ["it", "sys"], tech: ["seguridad"], links: [NETACAD_SEC] },
-      { name: "Platzi «Seguridad Informática para Equipos Técnicos»", hours: 3, category: "seguridad", profile: ["it", "sys"], tech: ["seguridad"], links: ["https://platzi.com/escuela/devops-cloud/"] },
-    ],
-  },
-  {
-    block: "soporte",
-    weeks: [37, 39],
-    cap: 6,
-    sequence: [
-      { name: "Simulacros de entrevista técnica de soporte: casos de tickets y resolución de problemas", hours: 18, category: "practica", profile: ["it"] },
+      { name: "Cisco: Linux Unhatched", hours: 8, category: "soporte", profile: ["it"], tech: ["linux"], links: [NETACAD_IT] },
+      { name: "Reconstruir P1 con scripts (la evaluación de Windows 11 caduca a los 90 días)", hours: 4, category: "practica", profile: ["it", "sys"], tech: ["windows", "linux"] },
     ],
   },
 
-  // ── Datos (5 h en Fase 1, 4 h en Fases 2–3) ──
+  // ── Datos (3 h en las semanas 1–26, 2 h en las 27–39) ──
   {
     block: "datos",
-    weeks: [1, 2],
-    cap: 5,
+    weeks: [1, 4],
+    cap: 3,
     sequence: [
       { name: "Platzi «SQL y MySQL» (terminar, estás en la última clase) y sacar el certificado", hours: 1, category: "fundamentos", tech: ["sql"], profile: ["da"], links: ["https://platzi.com/cursos/sql-mysql/"], cert: "SQL y MySQL (Platzi)" },
-      { name: "Excel Intermedio", hours: 9, category: "fundamentos", tech: ["excel"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/excel-basico/"] },
+      { name: "Platzi «Excel Intermedio»", hours: 11, category: "fundamentos", tech: ["excel"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/excel-basico/"] },
     ],
   },
   {
     block: "datos",
-    weeks: [3, 5],
-    cap: 5,
+    weeks: [5, 9],
+    cap: 3,
     sequence: [
-      { name: "Excel Intermedio (continuación)", hours: 3, category: "fundamentos", tech: ["excel"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/excel-basico/"] },
       { name: "Platzi «Excel Avanzado para Análisis de Datos»", hours: 12, category: "fundamentos", tech: ["excel"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/excel-avanzado/"] },
-    ],
-  },
-  {
-    block: "datos",
-    weeks: [6, 9],
-    cap: 5,
-    sequence: [
-      { name: "Platzi «Fundamentos de Bases de Datos y SQL»", hours: 20, category: "fundamentos", tech: ["sql"], profile: ["da"], links: ["https://platzi.com/cursos/sql-practico/"] },
+      { name: "Práctica de Excel: tablas dinámicas, BUSCARX y limpieza de datos", hours: 3, category: "practica", tech: ["excel"], profile: ["da", "bi"] },
     ],
   },
   {
     block: "datos",
     weeks: [10, 13],
-    cap: 5,
+    cap: 3,
     sequence: [
-      { name: "Práctica de SQL en HackerRank", hours: 20, category: "practica", tech: ["sql"], profile: ["da"], links: ["https://www.hackerrank.com/domains/sql"] },
+      { name: "Platzi «Fundamentos de Bases de Datos y SQL»", hours: 10, category: "fundamentos", tech: ["sql"], profile: ["da"], links: ["https://platzi.com/cursos/sql-practico/"] },
+      { name: "Primeras consultas SQL sobre la base de datos de GLPI", hours: 2, category: "practica", tech: ["sql"], profile: ["da", "it"] },
     ],
   },
   {
     block: "datos",
     weeks: [14, 17],
-    cap: 4,
+    cap: 3,
+    sequence: [{ name: "Platzi «Power BI»", hours: 12, category: "bi", tech: ["powerbi"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/power-bi/"] }],
+  },
+  {
+    block: "datos",
+    weeks: [18, 22],
+    cap: 3,
     sequence: [
-      { name: "Platzi Power BI", hours: 16, category: "bi", tech: ["powerbi"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/power-bi/"] },
+      // DAX se profundiza en las semanas 44–69 (modelado y PL-300)
+      { name: "Platzi «DAX para Power BI»", hours: 9, category: "bi", tech: ["powerbi"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/power-bi-dax/"] },
+      { name: "P4a v1 · Panel de SLA: 200 tickets simulados → consultas SQL → CSV → Power BI, publicado", hours: 6, category: "practica", tech: ["sql", "powerbi"], profile: ["da", "bi", "it"] },
     ],
   },
   {
     block: "datos",
-    weeks: [18, 23],
-    cap: 4,
+    weeks: [23, 26],
+    cap: 3,
     sequence: [
-      { name: "Platzi «DAX para Power BI»", hours: 24, category: "bi", tech: ["powerbi"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/power-bi-dax/"] },
+      { name: "P4b · Panel del pensionado con datos reales (ocupación, ingresos, clientes), anonimizado y publicado", hours: 12, category: "practica", tech: ["powerbi"], profile: ["da", "bi"] },
     ],
   },
   {
     block: "datos",
-    weeks: [24, 26],
-    cap: 4,
+    weeks: [27, 39],
+    cap: 2,
     sequence: [
-      { name: "Dashboard con datos reales del pensionado (ocupación, ingresos, clientes), publicado", hours: 12, category: "practica", tech: ["powerbi"], profile: ["da", "bi"] },
-    ],
-  },
-  {
-    block: "datos",
-    weeks: [27, 30],
-    cap: 4,
-    sequence: [
-      { name: "Platzi «Fundamentos de Python» (vas 5/32)", hours: 16, category: "fundamentos", tech: ["python"], profile: ["da"], links: ["https://platzi.com/cursos/python-basico/"] },
-    ],
-  },
-  {
-    block: "datos",
-    weeks: [31, 36],
-    cap: 4,
-    sequence: [
-      { name: "Python con pandas: Platzi «Python para Ciencia de Datos»", hours: 24, category: "python_avanzado", tech: ["python"], profile: ["da"], links: ["https://platzi.com/escuela/datos/"] },
-    ],
-  },
-  {
-    block: "datos",
-    weeks: [37, 39],
-    cap: 4,
-    sequence: [
-      { name: "Proyecto Python + SQL en GitHub", hours: 12, category: "practica", tech: ["python", "sql"], profile: ["da"] },
+      { name: "Práctica de SQL en HackerRank y LeetCode", hours: 14, category: "practica", tech: ["sql"], profile: ["da"], links: ["https://www.hackerrank.com/domains/sql", "https://leetcode.com/"] },
+      { name: "P4a v2: los mismos indicadores con los tickets reales de P1 (base de datos de GLPI) y medidas DAX documentadas", hours: 8, category: "practica", tech: ["sql", "powerbi"], profile: ["da", "bi", "it"] },
+      { name: "20 preguntas típicas de entrevista de datos (SQL, Excel, Power BI) respondidas", hours: 4, category: "empleabilidad", tech: ["sql", "excel", "powerbi"], profile: ["da"] },
     ],
   },
 
-  // ── Empleo e IA (2 h en Fase 1, 3 h en Fase 2, 4 h en Fase 3) ──
+  // ── Empleo y portfolio (2 h en las semanas 1–26, 4 h en las 27–39) ──
   {
     block: "empleo",
-    weeks: [1, 7],
+    weeks: [1, 8],
     cap: 2,
     sequence: [
+      { name: "Corregir el email de git y protocolo de IA: AI_USAGE.md en cada repo (sección 5)", hours: 1, category: "empleabilidad", tech: ["ia"] },
       { name: "CV en español e inglés, con el diploma de la Xunta", hours: 4, category: "empleabilidad" },
       { name: "LinkedIn", hours: 3, category: "empleabilidad" },
       { name: "GitHub: README de study_app y de Tu Lugar en Galicia", hours: 3, category: "empleabilidad" },
       { name: "Platzi «Preparar una Entrevista de Trabajo» (terminar, vas 13/19)", hours: 4, category: "empleabilidad" },
+      { name: "Hoja de registro de postulaciones (fecha, empresa, filtro de residencia, inglés pedido, respuesta) y filtros de la sección 2", hours: 1, category: "empleabilidad" },
     ],
   },
   {
     block: "empleo",
-    weeks: [8, 13],
+    weeks: [9, 26],
     cap: 2,
     weekly: [
-      { name: "Postulaciones: 3 por semana a atención al cliente o soporte en español (empleo puente, remoto desde Argentina)", hours: 1, category: "empleabilidad", links: JOBS },
+      { name: "Postulaciones: 5 por semana con los filtros de residencia de la sección 2, anotadas en la hoja", hours: 1, category: "empleabilidad", links: JOBS },
     ],
     sequence: [
-      { name: "Platzi «Claude AI» (terminar, vas 5/20)", hours: 6, category: "claude", tech: ["ia"], links: ["https://platzi.com/cursos/claude"] },
-    ],
-  },
-  {
-    block: "empleo",
-    weeks: [14, 26],
-    cap: 3,
-    weekly: [
-      { name: "Postulaciones: 5 por semana a soporte junior remoto", hours: 1, category: "empleabilidad", links: JOBS },
-      { name: "LinkedIn: una publicación por semana sobre el laboratorio o el dashboard", hours: 1, category: "empleabilidad" },
-    ],
-    sequence: [
+      { name: "README «Lab host» en GitHub", hours: 2, category: "empleabilidad", profile: ["it"] },
       { name: "Platzi «Servicio al Cliente y Soporte a Usuarios»", hours: 7, category: "empleabilidad", profile: ["it"] },
-      { name: "Platzi «Claude Code para No Programadores»", hours: 6, category: "claude", tech: ["ia"] },
+      { name: "LinkedIn: una publicación por entrega (P1 v1, P2 v1, P4a v1)", hours: 3, category: "empleabilidad" },
+      { name: "Platzi «Curso para Conseguir Trabajo en Tecnología»", hours: 1, category: "empleabilidad" },
+      {
+        name: "Entrevistas: preparar la pregunta sobre EOR («If I relocate to Spain in July 2027, could I keep the role through your EOR/contractor setup?»)",
+        hours: 1,
+        category: "empleabilidad",
+      },
+      { name: "Desde la semana 23: sumar ofertas de soporte de aplicaciones y de datos junior, con el CV adaptado", hours: 2, category: "empleabilidad" },
+      { name: "Punto de control de la semana 26: postulaciones, respuestas y reparto de bloques (sección 7)", hours: 2, category: "empleabilidad" },
     ],
   },
   {
@@ -377,40 +306,45 @@ const ETAPA1: Segment[] = [
     weeks: [27, 39],
     cap: 4,
     weekly: [
-      { name: "Postulaciones (5–10 por semana) y entrevistas", hours: 3, category: "empleabilidad", links: JOBS },
+      { name: "Postulaciones: 10 por semana y entrevistas, anotadas en la hoja", hours: 2, category: "empleabilidad", links: JOBS },
+      { name: "Simulacro semanal sin IA: un ticket aleatorio de P1 resuelto en voz alta, en inglés y con cronómetro", hours: 1, category: "practica", profile: ["it"] },
     ],
     sequence: [
       { name: "Scrum y Jira básico", hours: 3, category: "empleabilidad", links: ["https://scrumguides.org/"] },
-      { name: "Platzi «Curso para Conseguir Trabajo en Tecnología»", hours: 1, category: "empleabilidad" },
-      { name: "Preparación de entrevistas y seguimiento de postulaciones", hours: 9, category: "empleabilidad" },
+      { name: "Banco de 30 preguntas técnicas respondidas en español e inglés", hours: 6, category: "empleabilidad", profile: ["it"] },
+      { name: "Entrevistas en inglés: preparación y seguimiento de postulaciones", hours: 4, category: "empleabilidad" },
     ],
   },
-  // ── Ampliación (1–4 h por semana): temas del repo, cada uno justo después de su base ──
+
+  // ── Ampliación opcional (sección 4.1): 91 h, la semana no pasa de 19 h ──
   {
-    // antes del README de GitHub y de documentar el laboratorio
     block: "ampliacion",
     weeks: [1, 6],
     cap: 2,
+    track: "opcional",
     sequence: [
       { name: "Platzi «Git + GitHub»", hours: 10, category: "fundamentos", profile: ["da", "it"], links: ["https://platzi.com/cursos/gitgithub/"] },
       { name: "Práctica: repositorios y flujo de trabajo (commits, ramas, pull requests)", hours: 2, category: "practica", profile: ["da", "it"] },
     ],
   },
   {
-    // tras Platzi «Claude AI» (semanas 8–13) y antes de «Claude Code para No Programadores»
     block: "ampliacion",
-    weeks: [14, 20],
-    cap: 1,
+    weeks: [7, 13],
+    cap: 3,
+    track: "opcional",
     sequence: [
+      { name: "Platzi «Claude AI» (terminar, vas 5/20)", hours: 6, category: "claude", tech: ["ia"], links: ["https://platzi.com/cursos/claude"] },
       { name: "Claude 101 — Anthropic", hours: 3, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/claude-101"] },
       { name: "AI Fluency: Framework & Foundations — Anthropic", hours: 4, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/ai-fluency-framework-foundations"] },
+      { name: "AI Capabilities and Limitations — Anthropic", hours: 2, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/ai-capabilities-and-limitations"] },
+      { name: "Platzi «Claude Code para No Programadores»", hours: 6, category: "claude", tech: ["ia"] },
     ],
   },
   {
-    // tras SQL básico (semanas 6–9) y la práctica en HackerRank (10–13)
     block: "ampliacion",
-    weeks: [10, 15],
+    weeks: [14, 19],
     cap: 2,
+    track: "opcional",
     sequence: [
       { name: "Platzi «SQL Avanzado I»", hours: 10, category: "fundamentos", tech: ["sql"], profile: ["da"], links: ["https://platzi.com/cursos/sql-avanzado/"] },
       { name: "Práctica: optimización de consultas", hours: 2, category: "practica", tech: ["sql"], profile: ["da"] },
@@ -418,240 +352,254 @@ const ETAPA1: Segment[] = [
   },
   {
     block: "ampliacion",
-    weeks: [16, 22],
+    weeks: [20, 26],
     cap: 2,
+    track: "opcional",
     sequence: [
       { name: "Platzi «SQL Avanzado II + PostgreSQL»", hours: 10, category: "fundamentos", tech: ["sql"], profile: ["da", "de"], links: ["https://platzi.com/cursos/postgresql/"] },
       { name: "Proyecto: diseñar una base de datos en PostgreSQL", hours: 4, category: "practica", tech: ["sql"], profile: ["da"] },
     ],
   },
   {
-    // con el dashboard del pensionado y el laboratorio ya construidos, antes de la búsqueda intensiva
     block: "ampliacion",
-    weeks: [23, 26],
+    weeks: [27, 30],
     cap: 3,
-    sequence: [
-      { name: "Portfolio web: publicar el laboratorio, el dashboard y los proyectos en GitHub Pages", hours: 12, category: "empleabilidad", profile: ["it", "da"] },
-    ],
+    track: "opcional",
+    sequence: [{ name: "Portfolio web en GitHub Pages con P1–P4", hours: 12, category: "empleabilidad", profile: ["it", "da"] }],
   },
   {
-    // tras Fundamentos de Python (semanas 27–30)
     block: "ampliacion",
-    weeks: [31, 39],
-    cap: 1,
-    sequence: [
-      { name: "Entrevistas técnicas: ejercicios de código en LeetCode y HackerRank", hours: 9, category: "empleabilidad", tech: ["python"], links: ["https://leetcode.com/", "https://www.hackerrank.com/"] },
-    ],
-  },
-  {
-    // junto a pandas (semanas 31–36)
-    block: "ampliacion",
-    weeks: [31, 34],
-    cap: 3,
-    sequence: [
-      { name: "Platzi «Visualización: Matplotlib y Seaborn»", hours: 12, category: "python_avanzado", tech: ["python"], profile: ["da"], links: ["https://platzi.com/cursos/matplotlib-seaborn/"] },
-    ],
-  },
-  {
-    // con pandas y visualización listos, alimenta el proyecto Python + SQL
-    block: "ampliacion",
-    weeks: [36, 39],
-    cap: 3,
-    sequence: [
-      { name: "Platzi «Análisis Exploratorio de Datos (EDA)» aplicado al proyecto Python + SQL", hours: 12, category: "analisis", tech: ["python", "sql"], profile: ["da"], links: ["https://platzi.com/cursos/eda/"] },
-    ],
-  },
-]
-
-// ───────────────────────────── ETAPA 2 · semanas 40–78 · 12 h por semana ─────────────────────────────
-
-const ETAPA2: Segment[] = [
-  // ── Inglés (4 h) ──
-  {
-    block: "ingles",
-    weeks: [40, 63],
+    weeks: [31, 35],
     cap: 4,
-    weekly: [
-      { name: "Inglés: Platzi B2", hours: 3, category: "ingles", links: [PLATZI_ING] },
-      { name: "Inglés: Sesame", hours: 1, category: "ingles" },
-    ],
-  },
-  {
-    block: "ingles",
-    weeks: [64, 65],
-    cap: 4,
-    weekly: [
-      {
-        name: "Inglés: preparación y examen Aptis B2 (semanas 64–65)",
-        hours: 4,
-        category: "ingles",
-        links: ["https://www.britishcouncil.es/eu/azterketak/aptis/datak-prezioak-tokiak"],
-        cert: "Aptis B2",
-      },
-    ],
-  },
-  {
-    block: "ingles",
-    weeks: [66, 78],
-    cap: 4,
-    weekly: [
-      { name: "Inglés: Platzi B2", hours: 3, category: "ingles", links: [PLATZI_ING] },
-      { name: "Inglés: conversación", hours: 1, category: "ingles" },
-    ],
-  },
-
-  // ── Soporte y sistemas (5 h) ──
-  {
-    block: "soporte",
-    weeks: [40, 52],
-    cap: 5,
+    track: "opcional",
     sequence: [
       {
-        name: "MD-102 (Endpoint Administrator, Intune): ruta de Microsoft Learn",
-        hours: 52,
-        category: "certificacion",
-        profile: ["it", "sys"],
-        tech: ["windows"],
-        links: ["https://learn.microsoft.com/en-us/credentials/certifications/modern-desktop/"],
-      },
-      {
-        name: "MD-102: simulacros y laboratorio de Intune",
-        hours: 11,
-        category: "certificacion",
-        profile: ["it", "sys"],
-        tech: ["windows"],
-        links: ["https://learn.microsoft.com/en-us/credentials/certifications/modern-desktop/"],
-      },
-      {
-        name: "MD-102: examen (semana 52)",
-        hours: 2,
-        category: "certificacion",
-        profile: ["it", "sys"],
-        tech: ["windows"],
-        links: ["https://learn.microsoft.com/en-us/credentials/certifications/modern-desktop/"],
-        cert: "MD-102",
-      },
-    ],
-  },
-  {
-    block: "soporte",
-    weeks: [53, 65],
-    cap: 5,
-    sequence: [
-      // Linux Essentials dura 70 h: aquí se hacen unas 45 h (semanas 53–61) y el resto va a la Fase 7
-      { name: "Cisco Linux Essentials (unas 45 de sus 70 h; el resto, en la Fase 7)", hours: 45, category: "sistemas", profile: ["sys"], tech: ["linux"], links: [NETACAD_IT] },
-      { name: "ITIL 4 Foundation: preparación (semanas 62–65)", hours: 18, category: "certificacion", profile: ["it", "sys"] },
-      {
-        name: "ITIL 4 Foundation: examen (opcional, solo si lo paga la empresa)",
-        hours: 2,
-        category: "certificacion",
-        profile: ["it", "sys"],
-        cert: "ITIL 4 Foundation",
-      },
-    ],
-  },
-  {
-    block: "soporte",
-    weeks: [66, 78],
-    cap: 5,
-    // Opción A · Sistemas y cloud (la de más volumen: «cloud» 663 ofertas en España)
-    sequence: [
-      { name: "Opción A · Platzi Azure: IaaS, almacenamiento y bases de datos en Azure", hours: 20, category: "sistemas", profile: ["sys"], tech: ["cloud"], links: ["https://platzi.com/escuela/devops-cloud/"] },
-      // La carrera dura 70 h; con Azure no caben todas en 65 h: el resto va a la Fase 7
-      { name: "Opción A · Cisco «Carrera Profesional de Técnico en Redes» (45 de 70 h; el resto, en la Fase 7)", hours: 45, category: "sistemas", profile: ["sys"], tech: ["redes"], links: [NETACAD_NET] },
-    ],
-    // Opción B · Ciberseguridad (alternativa, solo una de las dos)
-    alt: [
-      { name: "Opción B · Cisco «Analista Junior en Ciberseguridad» (unas 65 de 120 h; el resto, en la Fase 7)", hours: 65, category: "seguridad", profile: ["sys"], tech: ["seguridad"], links: [NETACAD_SEC] },
-    ],
-  },
-
-  // ── Datos y negocio (3 h) ──
-  {
-    block: "datos",
-    weeks: [40, 52],
-    cap: 3,
-    sequence: [
-      { name: "Platzi «Power BI Avanzado»", hours: 24, category: "bi", tech: ["powerbi"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/power-bi/"] },
-      { name: "Modelado de datos: esquema estrella y modelo semántico", hours: 15, category: "bi", tech: ["powerbi", "sql"], profile: ["da", "bi"], links: ["https://learn.microsoft.com/es-es/training/modules/design-model-power-bi/"] },
-    ],
-  },
-  {
-    block: "datos",
-    weeks: [53, 65],
-    cap: 3,
-    sequence: [
-      {
-        name: "PL-300: preparación (Microsoft Learn, mocks y laboratorios)",
-        hours: 36,
-        category: "certificacion",
-        tech: ["powerbi"],
-        profile: ["bi", "da"],
-        links: ["https://learn.microsoft.com/en-us/credentials/certifications/exams/pl-300/"],
-      },
-      {
-        name: "PL-300: examen (semana 65)",
-        hours: 3,
-        category: "certificacion",
-        tech: ["powerbi"],
-        profile: ["bi", "da"],
-        links: ["https://learn.microsoft.com/en-us/credentials/certifications/exams/pl-300/"],
-        cert: "PL-300 Power BI",
-      },
-    ],
-  },
-  {
-    block: "datos",
-    weeks: [66, 78],
-    cap: 3,
-    sequence: [
-      {
-        name: "Contabilidad, finanzas y control de gestión para analistas",
+        name: "Contabilidad, finanzas y control de gestión para analistas (9 de 31 ofertas gallegas lo piden)",
         hours: 20,
         category: "negocio",
         tech: ["excel"],
         profile: ["da", "bi"],
         links: ["https://platzi.com/cursos/contabilidad-basica/", "https://platzi.com/cursos/planeacion-financiera/"],
       },
-      {
-        name: "Power Automate: automatización de procesos",
-        hours: 8,
-        category: "bi",
-        profile: ["bi"],
-        links: ["https://learn.microsoft.com/es-es/training/modules/build-microsoft-power-automate-flow/"],
-      },
-      {
-        name: "Introducción a ERP/SAP",
-        hours: 11,
-        category: "negocio",
-        profile: ["bi"],
-        links: ["https://learning.sap.com/courses/exploring-sap-analytics-cloud", "https://learning.sap.com/courses/discovering-sap-s-4hana-embedded-analytics"],
-      },
-    ],
-  },
-  // ── Ampliación (1–2 h por semana) ──
-  {
-    // tras Power BI, DAX y el dashboard de la Fase 2; profundiza el modelado de la misma fase
-    block: "ampliacion",
-    weeks: [40, 52],
-    cap: 1,
-    sequence: [
-      { name: "Platzi «Business Intelligence Estratégico»", hours: 10, category: "bi", tech: ["powerbi"], profile: ["bi", "da"], links: ["https://platzi.com/cursos/business-intelligence/"] },
-      { name: "Caso práctico: KPIs de un negocio", hours: 3, category: "practica", tech: ["powerbi"], profile: ["bi", "da"] },
-    ],
-  },
-  {
-    // tras «Claude AI» y «Claude Code para No Programadores» de la Etapa 1
-    block: "ampliacion",
-    weeks: [40, 46],
-    cap: 1,
-    sequence: [
-      { name: "Claude Code 101 — Anthropic", hours: 3, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/claude-code-101"] },
-      { name: "Claude Code in Action — Anthropic", hours: 4, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/claude-code-in-action"] },
     ],
   },
 ]
 
+// ───────────────────────────── FASE 2 · semanas 40–104 · 15 h fijas por semana (8 en la mudanza) ─────────────────────────────
+
+const FASE2: Segment[] = [
+  // ── Inglés (2 h en la mudanza y en las semanas 92–104; 3 h en las 44–91) ──
+  {
+    block: "ingles",
+    weeks: [40, 43],
+    cap: 2,
+    weekly: [
+      { name: "Inglés: Platzi English Academy B1", hours: 1, category: "ingles", links: [PLATZI_ING] },
+      { name: "Inglés: Sesame", hours: 1, category: "ingles" },
+    ],
+  },
+  {
+    block: "ingles",
+    weeks: [44, 69],
+    cap: 3,
+    weekly: [
+      { name: "Inglés: Platzi English Academy B2", hours: 2, category: "ingles", links: [PLATZI_ING] },
+      { name: "Inglés: Sesame", hours: 1, category: "ingles" },
+    ],
+  },
+  {
+    block: "ingles",
+    weeks: [70, 91],
+    cap: 3,
+    weekly: [
+      { name: "Inglés: Platzi English Academy B2", hours: 1, category: "ingles", links: [PLATZI_ING] },
+      { name: "Inglés: Sesame", hours: 1, category: "ingles" },
+    ],
+    sequence: [
+      { name: "Inglés: preparación de Aptis General B2", hours: 21, category: "ingles", links: ["https://www.britishcouncil.es/en/exam/aptis/what"] },
+      { name: "Inglés: examen Aptis General B2 (semana 91)", hours: 1, category: "ingles", links: [APTIS], cert: "Aptis B2" },
+    ],
+  },
+  {
+    block: "ingles",
+    weeks: [92, 104],
+    cap: 2,
+    weekly: [
+      { name: "Inglés: Platzi English Academy B2", hours: 1, category: "ingles", links: [PLATZI_ING] },
+      { name: "Inglés: conversación", hours: 1, category: "ingles" },
+    ],
+  },
+
+  // ── Alemán (4 h en las semanas 44–69, 6 h en las 70–91, 7 h en las 92–104): ≈ 327 h hasta B1 ──
+  {
+    block: "aleman",
+    weeks: [44, 69],
+    cap: 4,
+    sequence: [
+      { name: "Alemán A1: vhs-Lernportal y Goethe «Deutsch üben»", hours: 64, category: "aleman", links: ["https://a1.vhs-lernportal.de/", VHS] },
+      { name: "Alemán A2: vhs-Lernportal (inicio)", hours: 40, category: "aleman", links: [VHS] },
+    ],
+  },
+  {
+    block: "aleman",
+    weeks: [70, 91],
+    cap: 6,
+    sequence: [
+      { name: "Alemán A2: vhs-Lernportal (resto)", hours: 60, category: "aleman", links: [VHS] },
+      { name: "Alemán: examen A2 opcional (ÖSD o Goethe) o simulacro", hours: 2, category: "aleman", links: [OSD] },
+      { name: "Alemán B1: vhs-Lernportal (inicio)", hours: 70, category: "aleman", links: [VHS] },
+    ],
+  },
+  {
+    block: "aleman",
+    weeks: [92, 104],
+    cap: 7,
+    sequence: [
+      { name: "Alemán B1: vhs-Lernportal (resto)", hours: 70, category: "aleman", links: [VHS] },
+      { name: "Alemán B1: modelos de examen ÖSD y Goethe", hours: 18, category: "aleman", links: [OSD] },
+      { name: "Alemán: examen B1, ÖSD o Goethe (semana 104)", hours: 3, category: "aleman", links: [OSD], cert: "Alemán B1 (ÖSD o Goethe)" },
+    ],
+  },
+
+  // ── Sistemas (4 h en la mudanza, 5 h en las semanas 44–69, 4 h en las 70–104) ──
+  {
+    block: "soporte",
+    weeks: [40, 43],
+    cap: 4,
+    weekly: [
+      { name: "Postulaciones a helpdesk N1 en Galicia y en remoto desde España, ya residiendo allí", hours: 2, category: "empleabilidad", profile: ["it"], links: JOBS_ES },
+    ],
+    sequence: [
+      { name: "Mudanza: padrón, DNI e inscripción como demandante de empleo en Galicia (da acceso al programa de la Xunta para mayores de 52)", hours: 4, category: "empleabilidad" },
+      { name: "Volver a montar el laboratorio P1 tras la mudanza", hours: 4, category: "practica", profile: ["it", "sys"], tech: ["windows"] },
+    ],
+  },
+  {
+    block: "soporte",
+    weeks: [44, 60],
+    cap: 5,
+    sequence: [
+      { name: "MD-102 (Endpoint Administrator): ruta de Microsoft Learn (Intune, despliegue de Windows, cumplimiento de dispositivos)", hours: 60, category: "certificacion", profile: ["it", "sys"], tech: ["windows"], links: [MD102] },
+      {
+        name: "MD-102: laboratorio de Intune (prueba de 30 días de Intune o M365 Business Premium, opcional: pide tarjeta, cancela a tiempo)",
+        hours: 12,
+        category: "certificacion",
+        profile: ["it", "sys"],
+        tech: ["windows"],
+        links: [MD102],
+      },
+      { name: "MD-102: simulacros", hours: 10, category: "certificacion", profile: ["it", "sys"], tech: ["windows"], links: [MD102] },
+      { name: "MD-102: examen (semana 60)", hours: 3, category: "certificacion", profile: ["it", "sys"], tech: ["windows"], links: [MD102], cert: "MD-102" },
+    ],
+  },
+  {
+    block: "soporte",
+    weeks: [61, 69],
+    cap: 5,
+    sequence: [
+      { name: "Windows Server avanzado", hours: 12, category: "sistemas", profile: ["sys"], tech: ["windows"] },
+      { name: "Identidad híbrida: Entra Connect", hours: 8, category: "sistemas", profile: ["sys"], tech: ["windows", "cloud"] },
+      { name: "Platzi «Azure Active Directory»", hours: 8, category: "sistemas", profile: ["it", "sys"], tech: ["windows", "cloud"], links: ["https://platzi.com/escuela/devops-cloud/"] },
+      { name: "PowerShell intermedio: funciones, manejo de errores y logs", hours: 10, category: "sistemas", profile: ["it", "sys"], tech: ["windows", "linux"] },
+      { name: "P2 v2: manejo de errores, parámetros, una prueba simple y CSV de resultados que lee P4a", hours: 7, category: "practica", profile: ["it", "sys"], tech: ["windows", "linux"] },
+    ],
+  },
+  {
+    block: "soporte",
+    weeks: [70, 91],
+    cap: 4,
+    sequence: [
+      { name: "Platzi «AZ-900» como entrada a Azure", hours: 5, category: "sistemas", profile: ["it", "sys"], tech: ["cloud"], links: ["https://platzi.com/cursos/az-900/"] },
+      { name: "AZ-104 (Azure Administrator): ruta de Microsoft Learn", hours: 44, category: "certificacion", profile: ["sys"], tech: ["cloud"], links: [AZ104] },
+      {
+        name: "AZ-104: laboratorios (la cuenta gratuita de Azure da 200 US$ por 30 días y pide tarjeta; los sandboxes de Learn ya no existen)",
+        hours: 14,
+        category: "certificacion",
+        profile: ["sys"],
+        tech: ["cloud"],
+        links: [AZ104, "https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account"],
+      },
+      { name: "AZ-104: simulacros", hours: 10, category: "certificacion", profile: ["sys"], tech: ["cloud"], links: [AZ104] },
+      { name: "AZ-104: examen (semana 88)", hours: 3, category: "certificacion", profile: ["sys"], tech: ["cloud"], links: [AZ104], cert: "AZ-104 Azure Administrator" },
+      { name: "Cisco Linux Essentials (semanas 89–91)", hours: 12, category: "sistemas", profile: ["sys"], tech: ["linux"], links: [NETACAD_IT] },
+    ],
+  },
+  {
+    block: "soporte",
+    weeks: [92, 104],
+    cap: 4,
+    // con las semanas 89–91 suman 64 de sus 70 h; el resto va a la Fase 7
+    sequence: [{ name: "Cisco Linux Essentials (continuación)", hours: 52, category: "sistemas", profile: ["sys"], tech: ["linux"], links: [NETACAD_IT] }],
+  },
+
+  // ── Datos (2 h en la mudanza, 3 h en las semanas 44–69, 2 h en las 70–104) ──
+  {
+    block: "datos",
+    weeks: [40, 43],
+    cap: 2,
+    weekly: [
+      { name: "Postulaciones a puestos con Excel y Power BI en Galicia y en remoto desde España", hours: 1, category: "empleabilidad", profile: ["da", "bi"], links: JOBS_ES },
+    ],
+    sequence: [
+      { name: "Adaptar P4 y el CV a ofertas de negocio con Power BI (administración, finanzas, control de gestión)", hours: 4, category: "empleabilidad", tech: ["powerbi"], profile: ["da", "bi"] },
+    ],
+  },
+  {
+    block: "datos",
+    weeks: [44, 60],
+    cap: 3,
+    sequence: [
+      { name: "Platzi «Power BI Avanzado»", hours: 24, category: "bi", tech: ["powerbi"], profile: ["da", "bi"], links: ["https://platzi.com/cursos/power-bi/"] },
+      {
+        name: "Modelado de datos: esquema estrella, modelo semántico, Power Query y DAX en profundidad",
+        hours: 15,
+        category: "bi",
+        tech: ["powerbi", "sql"],
+        profile: ["da", "bi"],
+        links: ["https://learn.microsoft.com/es-es/training/modules/design-model-power-bi/"],
+      },
+      { name: "PL-300: ruta de Microsoft Learn (parte 1)", hours: 12, category: "certificacion", tech: ["powerbi"], profile: ["bi", "da"], links: [PL300] },
+    ],
+  },
+  {
+    block: "datos",
+    weeks: [61, 69],
+    cap: 3,
+    sequence: [
+      { name: "PL-300: ruta de Learn (resto), simulacros y laboratorios", hours: 24, category: "certificacion", tech: ["powerbi"], profile: ["bi", "da"], links: [PL300] },
+      { name: "PL-300: examen (semana 69)", hours: 3, category: "certificacion", tech: ["powerbi"], profile: ["bi", "da"], links: [PL300], cert: "PL-300 Power BI" },
+    ],
+  },
+  {
+    block: "datos",
+    weeks: [70, 91],
+    cap: 2,
+    sequence: [
+      { name: "Platzi «Fundamentos de Python» (vas 5/32)", hours: 16, category: "fundamentos", tech: ["python"], profile: ["da"], links: ["https://platzi.com/cursos/python-basico/"] },
+      { name: "Python con pandas: Platzi «Python para Ciencia de Datos»", hours: 24, category: "python_avanzado", tech: ["python"], profile: ["da"], links: ["https://platzi.com/escuela/datos/"] },
+      { name: "Práctica: pandas con los datos de P4", hours: 4, category: "practica", tech: ["python"], profile: ["da"] },
+    ],
+  },
+  {
+    block: "datos",
+    weeks: [92, 104],
+    cap: 2,
+    sequence: [
+      { name: "Proyecto Python + SQL en GitHub (con CTE y funciones de ventana)", hours: 12, category: "practica", tech: ["python", "sql"], profile: ["da"] },
+      { name: "Platzi «Análisis Exploratorio de Datos (EDA)» aplicado al proyecto Python + SQL", hours: 12, category: "analisis", tech: ["python", "sql"], profile: ["da"], links: ["https://platzi.com/cursos/eda/"] },
+      { name: "Portfolio de datos y CV para España y Viena", hours: 2, category: "empleabilidad", profile: ["da"] },
+    ],
+  },
+
+  // ── Gallego opcional desde la mudanza (sección 3) ──
+  {
+    block: "ampliacion",
+    weeks: [44, 104],
+    cap: 1,
+    track: "opcional",
+    weekly: [{ name: "Gallego básico (opcional; 3 de 19 ofertas españolas de soporte lo piden)", hours: 1, category: "idiomas" }],
+  },
+]
 
 // ───────────────────────────── Programación semana a semana ─────────────────────────────
 
@@ -717,22 +665,21 @@ function schedule(segments: Segment[]) {
     const put = (week: number, task: RouteTask) => (BY_WEEK[week] ??= []).push({ block: seg.block, task })
 
     for (const item of seg.weekly ?? []) {
-      for (let w = from; w <= to; w++) put(w, toTask(item, item.hours, item.name, w === to))
+      for (let w = from; w <= to; w++) put(w, toTask(item, item.hours, item.name, w === to, seg.track))
     }
-    if (seg.sequence) pour(seg.sequence, from, weeks, free).forEach((p) => put(p.week, p.task))
-    if (seg.alt) pour(seg.alt, from, weeks, free, "alt").forEach((p) => put(p.week, p.task))
+    if (seg.sequence) pour(seg.sequence, from, weeks, free, seg.track).forEach((p) => put(p.week, p.task))
   }
 }
 
-schedule(ETAPA1)
-schedule(ETAPA2)
+schedule(FASE1)
+schedule(FASE2)
 
-/** Horas planificadas de una semana del plan principal (sin la opción B ni la Fase 7) */
+/** Horas fijas planificadas de una semana (sin las opcionales ni la Fase 7) */
 export function getWeeklyHours(week: number): number {
   return (BY_WEEK[week] ?? []).reduce((sum, cell) => sum + (cell.task.track ? 0 : cell.task.durationHours), 0)
 }
 
-/** Tareas del plan principal de una semana (1–78), ordenadas: inglés, soporte y sistemas, datos, empleo e IA */
+/** Tareas de una semana (1–104), ordenadas: inglés, alemán, soporte y sistemas, datos, empleo y ampliación opcional */
 export function getRouteTasks(week: number): RouteTask[] {
   return (BY_WEEK[week] ?? [])
     .map((cell, order) => ({ cell, order }))
@@ -740,52 +687,45 @@ export function getRouteTasks(week: number): RouteTask[] {
     .map(({ cell }) => cell.task)
 }
 
-// ───────────────────────────── FASE 7 · después de los 18 meses (sin plazo) ─────────────────────────────
-// En el orden de importancia laboral de la ruta. Los módulos que ya existían en la ruta anterior del repo
-// (Tableau, Looker, storytelling, A/B, ML, Big Data, Docker, Claude API/MCP, Google DA, AI-901, etc.)
-// conservan sus horas y su nivel de interés. Las horas marcadas «estimadas» no figuran en ningún documento.
+// ───────────────────────────── FASE 7 · después de octubre de 2028 (sin plazo) ─────────────────────────────
+// En el orden de la sección 4.1: BI en Galicia, sistemas, datos e IA; al final, lo que la ruta no ubica (empleo, otros
+// idiomas y cursos de Platzi en pausa). Cada módulo conserva sus horas y su nivel de interés. Las horas marcadas
+// «estimadas» no figuran en ningún documento.
 
 const f7 = (item: RouteItem): RouteTask => toTask(item, item.hours, item.name, true, "fase7")
 
 const FASE7: RouteItem[] = [
-  // 1 · BI en Galicia
-  { name: "ERP y SAP para analistas (resto): SAP Analytics Cloud y analítica en S/4HANA", hours: 4, category: "negocio", profile: ["bi"], links: ["https://learning.sap.com/courses/exploring-sap-analytics-cloud", "https://learning.sap.com/courses/discovering-sap-s-4hana-embedded-analytics"] },
+  // 1 · BI en Galicia (si tu empleo o una oferta lo piden, entran antes en el bloque de datos)
+  { name: "Introducción a ERP/SAP (8 de 31 ofertas gallegas)", hours: 11, category: "negocio", profile: ["bi"], links: ["https://learning.sap.com/courses/exploring-sap-analytics-cloud", "https://learning.sap.com/courses/discovering-sap-s-4hana-embedded-analytics"] },
+  { name: "ERP y SAP para analistas: SAP Analytics Cloud y analítica en S/4HANA", hours: 4, category: "negocio", profile: ["bi"], links: ["https://learning.sap.com/courses/exploring-sap-analytics-cloud", "https://learning.sap.com/courses/discovering-sap-s-4hana-embedded-analytics"] },
+  { name: "Power Automate: automatización de procesos", hours: 8, category: "bi", profile: ["bi"], links: ["https://learn.microsoft.com/es-es/training/modules/build-microsoft-power-automate-flow/"] },
+  { name: "Platzi «Business Intelligence Estratégico»", hours: 10, category: "bi", tech: ["powerbi"], profile: ["bi", "da"], links: ["https://platzi.com/cursos/business-intelligence/"] },
+  { name: "Caso práctico: KPIs de un negocio", hours: 3, category: "practica", tech: ["powerbi"], profile: ["bi", "da"] },
   { name: "Microsoft Fabric: introducción", hours: 8, category: "bi", tech: ["cloud"], profile: ["bi"], links: ["https://learn.microsoft.com/es-es/training/paths/get-started-fabric/"] },
   { name: "Qlik Sense: introducción", hours: 6, category: "bi", profile: ["bi"], links: ["https://learning.qlik.com/student/collection/2196958-qlik-sense-business-analyst-free-learning-content"] },
-  // 2
-  { name: "Calidad de datos: validaciones y tests", hours: 5, category: "analisis", tech: ["sql"], profile: ["da"], links: ["https://docs.getdbt.com/docs/build/data-tests"] },
-  { name: "Stack moderno: dbt con BigQuery y Snowflake (introducción)", hours: 10, category: "ingenieria", tech: ["sql", "cloud"], profile: ["da", "de"], links: ["https://docs.getdbt.com/guides/bigquery", "https://docs.snowflake.com/en/user-guide/tutorials/snowflake-in-20minutes"] },
-  // 2b · búsqueda de empleo (prolonga el bloque de empleo de las Fases 2 y 3)
-  { name: "Networking y aplicaciones: contactos, reclutadores y comunidades", hours: 10, category: "empleabilidad" },
-  { name: "Estrategia de búsqueda de empleo: embudo, seguimiento y métricas", hours: 3, category: "empleabilidad" },
-  // 3 · redes y cloud (resto de la Fase 6) y certificación según la opción elegida
-  { name: "Cisco Linux Essentials (resto de las 70 h)", hours: 25, category: "sistemas", profile: ["sys"], tech: ["linux"], links: [NETACAD_IT] },
-  { name: "Opción A (resto): Cisco «Carrera Profesional de Técnico en Redes», 25 de 70 h", hours: 25, category: "sistemas", profile: ["sys"], tech: ["redes"], links: [NETACAD_NET] },
-  { name: "CCNA (Cisco), si elegiste la opción A — horas estimadas", hours: 120, category: "certificacion", profile: ["sys"], tech: ["redes"], links: [NETACAD_NET] },
-  { name: "Certificación de Azure de nivel intermedio (p. ej. AZ-104), si elegiste la opción A — horas estimadas", hours: 60, category: "certificacion", profile: ["sys"], tech: ["cloud"], links: ["https://learn.microsoft.com/en-us/credentials/browse/?products=azure"] },
-  { name: "Cloud AWS: fundamentos (para comparar con Azure, tras AZ-900 y la certificación intermedia)", hours: 10, category: "ingenieria", tech: ["cloud"], profile: ["de", "sys"], links: ["https://platzi.com/cursos/aws-fundamentos/"] },
+  // 2 · sistemas
+  { name: "ITIL 4 Foundation: preparación (si lo paga la empresa, entra en las semanas 92–104)", hours: 18, category: "certificacion", profile: ["it", "sys"] },
+  { name: "ITIL 4 Foundation: examen (solo si lo paga la empresa)", hours: 2, category: "certificacion", profile: ["it", "sys"], cert: "ITIL 4 Foundation" },
+  { name: "AZ-900: práctica y guía de Microsoft Learn (el examen es opcional y sin fecha)", hours: 22, category: "certificacion", profile: ["it", "sys"], tech: ["cloud"], links: [AZ900] },
+  { name: "AZ-900: examen opcional (€76 en España)", hours: 1, category: "certificacion", profile: ["it", "sys"], tech: ["cloud"], links: [AZ900], cert: "AZ-900 Azure Fundamentals" },
+  { name: "AB-900: examen opcional (la guía ya está en las semanas 18–22)", hours: 2, category: "certificacion", profile: ["it"], tech: ["windows"], links: [AB900], cert: "AB-900" },
+  { name: "Cisco: Introducción a Ciberseguridad", hours: 6, category: "seguridad", profile: ["it", "sys"], tech: ["seguridad"], links: [NETACAD_SEC] },
+  { name: "Cisco: Seguridad de Terminales", hours: 27, category: "seguridad", profile: ["it", "sys"], tech: ["seguridad"], links: [NETACAD_SEC] },
+  { name: "Platzi «Seguridad Informática para Equipos Técnicos»", hours: 3, category: "seguridad", profile: ["it", "sys"], tech: ["seguridad"], links: ["https://platzi.com/escuela/devops-cloud/"] },
+  { name: "Platzi «Redes Informáticas de Internet»", hours: 6, category: "soporte", profile: ["it"], tech: ["redes"], links: ["https://platzi.com/cursos/redes/"] },
+  { name: "Platzi «Servidores Linux» (4 h de curso + 2 h de práctica)", hours: 6, category: "sistemas", profile: ["sys"], tech: ["linux"], links: ["https://platzi.com/escuela/devops-cloud/"] },
+  { name: "Cisco Linux Essentials (resto de las 70 h)", hours: 6, category: "sistemas", profile: ["sys"], tech: ["linux"], links: [NETACAD_IT] },
+  { name: "Opción A · Platzi Azure: IaaS, almacenamiento y bases de datos en Azure", hours: 20, category: "sistemas", profile: ["sys"], tech: ["cloud"], links: ["https://platzi.com/escuela/devops-cloud/"] },
+  { name: "Opción A · Cisco «Carrera Profesional de Técnico en Redes»", hours: 70, category: "sistemas", profile: ["sys"], tech: ["redes"], links: [NETACAD_NET] },
+  { name: "Opción A · CCNA (Cisco) — horas estimadas", hours: 120, category: "certificacion", profile: ["sys"], tech: ["redes"], links: [NETACAD_NET] },
+  { name: "Opción B · Cisco «Analista Junior en Ciberseguridad»", hours: 120, category: "seguridad", profile: ["sys"], tech: ["seguridad"], links: [NETACAD_SEC] },
+  { name: "Opción B · Google Cybersecurity — horas estimadas", hours: 70, category: "certificacion", profile: ["sys"], tech: ["seguridad"], links: ["https://grow.google/certificates/cybersecurity/"] },
+  { name: "Opción B · CompTIA Security+ — horas estimadas", hours: 60, category: "certificacion", profile: ["sys"], tech: ["seguridad"], links: ["https://www.comptia.org/certifications/security"] },
+  { name: "Cloud AWS: fundamentos (para comparar con Azure, tras AZ-104)", hours: 10, category: "ingenieria", tech: ["cloud"], profile: ["de", "sys"], links: ["https://platzi.com/cursos/aws-fundamentos/"] },
   { name: "Práctica: desplegar un servicio básico en AWS", hours: 3, category: "practica", tech: ["cloud"], profile: ["de", "sys"] },
-  // 4 · seguridad, si elegiste la opción B
-  { name: "Opción B (resto): Cisco «Analista Junior en Ciberseguridad», 55 de 120 h", hours: 55, category: "seguridad", profile: ["sys"], tech: ["seguridad"], links: [NETACAD_SEC] },
-  { name: "Google Cybersecurity, si elegiste la opción B — horas estimadas", hours: 70, category: "certificacion", profile: ["sys"], tech: ["seguridad"], links: ["https://grow.google/certificates/cybersecurity/"] },
-  { name: "CompTIA Security+, si elegiste la opción B — horas estimadas", hours: 60, category: "certificacion", profile: ["sys"], tech: ["seguridad"], links: ["https://www.comptia.org/certifications/security"] },
-  // 5 · IA avanzada: de los conceptos a la API y después a los agentes
-  { name: "AI Capabilities and Limitations — Anthropic", hours: 2, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/ai-capabilities-and-limitations"] },
-  { name: "Platzi «Prompt Engineering» (IA aplicada)", hours: 10, category: "ia", tech: ["ia"], profile: ["ds"], links: ["https://platzi.com/cursos/prompt-engineering/"] },
-  { name: "Proyecto: chatbot básico", hours: 3, category: "practica", tech: ["ia"], profile: ["ds"] },
-  { name: "Platzi «APIs de IA (OpenAI y Anthropic)»", hours: 10, category: "ia", tech: ["python", "ia"], profile: ["ds"], links: ["https://platzi.com/cursos/openai-api/"] },
-  { name: "Proyecto: integración de IA en una app", hours: 3, category: "practica", tech: ["python", "ia"], profile: ["ds"] },
-  { name: "Building with Claude API", hours: 8, category: "claude", tech: ["ia", "python"], links: ["https://anthropic.skilljar.com/claude-with-the-anthropic-api"] },
-  { name: "Introduction to MCP", hours: 6, category: "claude", tech: ["ia", "python"], links: ["https://anthropic.skilljar.com/introduction-to-model-context-protocol"] },
-  { name: "MCP: Advanced Topics", hours: 5, category: "claude", tech: ["ia", "python"], links: ["https://anthropic.skilljar.com/model-context-protocol-advanced-topics"] },
-  { name: "LangChain & RAG", hours: 10, category: "ia", tech: ["python", "ia"], profile: ["ds"], links: ["https://platzi.com/cursos/langchain/"] },
-  { name: "Proyecto: Sistema RAG", hours: 3, category: "practica", tech: ["python", "ia"], profile: ["ds"] },
-  { name: "Introduction to Agent Skills — Anthropic", hours: 3, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/introduction-to-agent-skills"] },
-  { name: "Introduction to Subagents — Anthropic", hours: 3, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/introduction-to-subagents"] },
-  { name: "Introduction to Claude Cowork — Anthropic", hours: 4, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/introduction-to-claude-cowork"] },
-  { name: "Microsoft Azure AI Fundamentals (AI-901)", hours: 20, category: "certificacion", tech: ["cloud", "ia"], links: ["https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/"], cert: "AI-901 Azure AI Fundamentals" },
-  { name: "Copilot Studio — horas estimadas", hours: 8, category: "ia", tech: ["ia"], links: ["https://learn.microsoft.com/es-es/training/paths/work-power-virtual-agents/"] },
-  // 6 · Python aplicado a informes, visualización y analítica
+  // 3 · datos
+  { name: "Platzi «Visualización: Matplotlib y Seaborn»", hours: 12, category: "python_avanzado", tech: ["python"], profile: ["da"], links: ["https://platzi.com/cursos/matplotlib-seaborn/"] },
+  { name: "Entrevistas técnicas: ejercicios de Python en LeetCode y HackerRank", hours: 9, category: "empleabilidad", tech: ["python"], links: ["https://leetcode.com/", "https://www.hackerrank.com/"] },
   { name: "Platzi «Excel con Python (OpenPyXL)»", hours: 10, category: "fundamentos", tech: ["python", "excel"], profile: ["da"], links: ["https://platzi.com/cursos/python-excel/"] },
   { name: "Proyecto: automatización de informes en Excel con Python", hours: 3, category: "practica", tech: ["python", "excel"], profile: ["da"] },
   { name: "Tableau Básico", hours: 10, category: "bi", tech: ["tableau"], profile: ["da"], links: ["https://platzi.com/cursos/tableau/"] },
@@ -794,23 +734,21 @@ const FASE7: RouteItem[] = [
   { name: "Proyecto: Dashboard ejecutivo", hours: 2, interest: "media", category: "practica", tech: ["tableau"], profile: ["da"] },
   { name: "Looker Studio + Google Analytics", hours: 10, category: "bi", profile: ["da"], links: ["https://platzi.com/cursos/google-data-studio/"] },
   { name: "Proyecto: Reporte automatizado en Looker Studio", hours: 3, category: "practica", profile: ["da"] },
+  { name: "Analítica de producto y web: GA4, embudos, cohortes y retención", hours: 6, interest: "media", category: "analisis", profile: ["da"], links: ["https://support.google.com/analytics/answer/6367342?hl=es"] },
   { name: "Storytelling con Datos", hours: 10, category: "bi", profile: ["da"], links: ["https://platzi.com/cursos/storytelling-datos/"] },
   { name: "Proyecto: Presentación ejecutiva", hours: 3, category: "practica", profile: ["da"] },
   { name: "Proyecto Integrador BI: de los datos al dashboard y la presentación", hours: 10, category: "practica", tech: ["powerbi", "sql"], profile: ["bi", "da"] },
   { name: "Portfolio: documentación del proyecto integrador", hours: 3, category: "practica", tech: ["powerbi"], profile: ["bi", "da"] },
-  { name: "Analítica de producto y web: GA4, embudos, cohortes y retención", hours: 6, interest: "media", category: "analisis", profile: ["da"], links: ["https://support.google.com/analytics/answer/6367342?hl=es"] },
-  // 7 · estadística (de las bases a la inferencia), A/B y certificados de Google
+  { name: "Google Data Analytics — Módulo 1", hours: 10, category: "certificacion", profile: ["da"], links: ["https://grow.google/certificates/data-analytics/"] },
+  { name: "Google Data Analytics — Módulos 2–8", hours: 80, category: "certificacion", profile: ["da"], links: ["https://grow.google/certificates/data-analytics/"], cert: "Google Data Analytics" },
   { name: "Estadística Descriptiva", hours: 10, category: "analisis", tech: ["python"], profile: ["ds"], links: ["https://platzi.com/cursos/estadistica-descriptiva/"] },
   { name: "Proyecto: Análisis estadístico", hours: 3, category: "practica", tech: ["python"], profile: ["ds"] },
   { name: "Platzi «Matemáticas para Data Science»: estadística inferencial", hours: 10, category: "fundamentos", tech: ["python"], profile: ["ds"], links: ["https://platzi.com/cursos/estadistica-inferencial/"] },
   { name: "Práctica: ejercicios matemáticos y de probabilidad", hours: 3, category: "practica", tech: ["python"], profile: ["ds"] },
   { name: "A/B Testing & Experimentación", hours: 6, interest: "media", category: "analisis", tech: ["python"], profile: ["ds", "da"], links: ["https://platzi.com/cursos/ab-testing/"] },
   { name: "Proyecto: Diseño de experimento", hours: 2, interest: "media", category: "practica", tech: ["python"], profile: ["ds"] },
-  { name: "Google Data Analytics — Módulo 1", hours: 10, category: "certificacion", profile: ["da"], links: ["https://grow.google/certificates/data-analytics/"] },
-  { name: "Google Data Analytics — Módulos 2–8", hours: 80, category: "certificacion", profile: ["da"], links: ["https://grow.google/certificates/data-analytics/"], cert: "Google Data Analytics" },
   { name: "Google Advanced DA — Preparación", hours: 20, interest: "media", category: "certificacion", profile: ["da"], links: ["https://grow.google/certificates/advanced-data-analytics/"] },
   { name: "Google Advanced DA — Examen", hours: 10, interest: "media", category: "certificacion", profile: ["da"], links: ["https://grow.google/certificates/advanced-data-analytics/"], cert: "Google Advanced DA" },
-  // 8 · ML, Big Data, Docker, Kubernetes
   { name: "Fundamentos Machine Learning", hours: 4, interest: "baja", category: "ml", tech: ["ml", "python"], profile: ["ds"], links: ["https://platzi.com/cursos/machine-learning/"] },
   { name: "Práctica: Primer modelo", hours: 1, interest: "baja", category: "practica", tech: ["ml"], profile: ["ds"] },
   { name: "Regresión Lineal & Logística", hours: 6, interest: "media", category: "ml", tech: ["ml", "python"], profile: ["ds"], links: ["https://platzi.com/cursos/regresion-lineal-python/"] },
@@ -839,13 +777,33 @@ const FASE7: RouteItem[] = [
   { name: "Documentación & Presentación del proyecto ML", hours: 2, interest: "media", category: "practica", profile: ["ds"] },
   { name: "Big Data Fundamentos", hours: 6, interest: "media", category: "ingenieria", tech: ["python"], profile: ["de"], links: ["https://platzi.com/cursos/big-data/"] },
   { name: "Práctica: PySpark básico", hours: 2, interest: "media", category: "practica", tech: ["python"], profile: ["de"] },
+  { name: "Calidad de datos: validaciones y tests", hours: 5, category: "analisis", tech: ["sql"], profile: ["da"], links: ["https://docs.getdbt.com/docs/build/data-tests"] },
+  { name: "Stack moderno: dbt con BigQuery y Snowflake (introducción)", hours: 10, category: "ingenieria", tech: ["sql", "cloud"], profile: ["da", "de"], links: ["https://docs.getdbt.com/guides/bigquery", "https://docs.snowflake.com/en/user-guide/tutorials/snowflake-in-20minutes"] },
   { name: "Docker & Containerization", hours: 4, interest: "baja", category: "ingenieria", profile: ["de"], links: ["https://platzi.com/cursos/docker/"] },
   { name: "Proyecto: Containerizar app", hours: 1, interest: "baja", category: "practica", profile: ["de"] },
   { name: "Kubernetes — horas estimadas", hours: 10, interest: "baja", category: "ingenieria", profile: ["de"] },
-  // 9 · idiomas
+  // 4 · IA: resto de los cursos de Claude, de los conceptos a la API y después a los agentes
+  { name: "Claude Code 101 — Anthropic", hours: 3, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/claude-code-101"] },
+  { name: "Claude Code in Action — Anthropic", hours: 4, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/claude-code-in-action"] },
+  { name: "Platzi «Microsoft 365 Copilot»", hours: 3, category: "ia", profile: ["it"], tech: ["windows", "ia"], links: ["https://platzi.com/escuela/devops-cloud/"] },
+  { name: "Platzi «Prompt Engineering» (IA aplicada)", hours: 10, category: "ia", tech: ["ia"], profile: ["ds"], links: ["https://platzi.com/cursos/prompt-engineering/"] },
+  { name: "Proyecto: chatbot básico", hours: 3, category: "practica", tech: ["ia"], profile: ["ds"] },
+  { name: "Platzi «APIs de IA (OpenAI y Anthropic)»", hours: 10, category: "ia", tech: ["python", "ia"], profile: ["ds"], links: ["https://platzi.com/cursos/openai-api/"] },
+  { name: "Proyecto: integración de IA en una app", hours: 3, category: "practica", tech: ["python", "ia"], profile: ["ds"] },
+  { name: "Building with Claude API", hours: 8, category: "claude", tech: ["ia", "python"], links: ["https://anthropic.skilljar.com/claude-with-the-anthropic-api"] },
+  { name: "Introduction to MCP", hours: 6, category: "claude", tech: ["ia", "python"], links: ["https://anthropic.skilljar.com/introduction-to-model-context-protocol"] },
+  { name: "MCP: Advanced Topics", hours: 5, category: "claude", tech: ["ia", "python"], links: ["https://anthropic.skilljar.com/model-context-protocol-advanced-topics"] },
+  { name: "LangChain & RAG", hours: 10, category: "ia", tech: ["python", "ia"], profile: ["ds"], links: ["https://platzi.com/cursos/langchain/"] },
+  { name: "Proyecto: Sistema RAG", hours: 3, category: "practica", tech: ["python", "ia"], profile: ["ds"] },
+  { name: "Introduction to Agent Skills — Anthropic", hours: 3, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/introduction-to-agent-skills"] },
+  { name: "Introduction to Subagents — Anthropic", hours: 3, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/introduction-to-subagents"] },
+  { name: "Introduction to Claude Cowork — Anthropic", hours: 4, category: "claude", tech: ["ia"], links: ["https://anthropic.skilljar.com/introduction-to-claude-cowork"] },
+  { name: "Microsoft Azure AI Fundamentals (AI-901)", hours: 20, category: "certificacion", tech: ["cloud", "ia"], links: ["https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/"], cert: "AI-901 Azure AI Fundamentals" },
+  { name: "Copilot Studio — horas estimadas", hours: 8, category: "ia", tech: ["ia"], links: ["https://learn.microsoft.com/es-es/training/paths/work-power-virtual-agents/"] },
+  // 5 · lo que la ruta no ubica: búsqueda de empleo, otros idiomas y cursos de Platzi en pausa
+  { name: "Networking y aplicaciones: contactos, reclutadores y comunidades", hours: 10, category: "empleabilidad" },
+  { name: "Estrategia de búsqueda de empleo: embudo, seguimiento y métricas", hours: 3, category: "empleabilidad" },
   { name: "Francés (subir desde A2)", hours: 20, interest: "baja", category: "idiomas" },
-  { name: "Alemán A1 (inicio); solo si vuelves a mirar Suiza", hours: 11, interest: "media", category: "idiomas", links: ["https://a1.vhs-lernportal.de/"] },
-  // 10 · cursos de Platzi en pausa (horas estimadas; «y otros» no se pueden enumerar desde aquí)
   { name: "Platzi en pausa: Django — horas estimadas", hours: 10, interest: "baja", category: "fundamentos" },
   { name: "Platzi en pausa: React — horas estimadas", hours: 10, interest: "baja", category: "fundamentos" },
   { name: "Platzi en pausa: Node — horas estimadas", hours: 10, interest: "baja", category: "fundamentos" },

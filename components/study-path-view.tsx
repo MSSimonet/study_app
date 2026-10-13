@@ -22,22 +22,23 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
     return acc
   }, {})
 
-  // viernes de la última semana del plan
-  const lastDay = weekStart(TOTAL_WEEKS)
-  lastDay.setDate(lastDay.getDate() + 4)
+  // último día de la última semana del plan (las semanas empiezan el día de la semana de START_DATE)
+  const lastDay = weekStart(TOTAL_WEEKS + 1)
+  lastDay.setDate(lastDay.getDate() - 1)
 
   let currentDisplayPhase = 0
 
   return (
     <div className="p-4 sm:p-8">
       <h2 className="text-3xl font-extrabold text-white mb-6">Ruta de Estudio Detallada</h2>
-      <p className="text-slate-400 mb-8">Ruta de {TOTAL_WEEKS} semanas, del {weekStart(1).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })} al {lastDay.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })} (lunes a viernes): empleo remoto en la semana 39 y perfil técnico en crecimiento hasta la 78. La Fase 7 queda sin plazo.</p>
+      <p className="text-slate-400 mb-8">Ruta de {TOTAL_WEEKS} semanas, del {weekStart(1).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })} al {lastDay.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}: 15 h fijas por semana (8 en la mudanza, semanas 40–43) más las opcionales; primer empleo hacia la semana 39 y alemán B1 en la 104. La Fase 7 queda sin plazo.</p>
       <div className="space-y-8">
         {Object.values(weeks).map((weekObj) => {
           const isCurrentWeek = weekObj.week === currentWeek
           const isBacklog = weekObj.week === FASE7_WEEK
           const isFutureWeek = !isBacklog && weekObj.week > currentWeek
           const weeklyHoursTotal = weekObj.tasks.reduce((sum, task) => sum + (task.track ? 0 : task.durationHours), 0)
+          const optionalHoursTotal = weekObj.tasks.reduce((sum, task) => sum + (task.track === "opcional" ? task.durationHours : 0), 0)
           const backlogHoursTotal = weekObj.tasks.reduce((sum, task) => sum + (task.track === "fase7" ? task.durationHours : 0), 0)
           const weekPhase = phaseOfWeek(weekObj.week)
 
@@ -70,7 +71,7 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className={`text-xl font-bold ${isCurrentWeek ? "text-indigo-300" : "text-white"}`}>
-                    {isBacklog ? "Fase 7 · después de los 18 meses" : `Semana ${weekObj.week}`}
+                    {isBacklog ? "Fase 7 · después de octubre de 2028" : `Semana ${weekObj.week}`}
                     <span className="ml-3 text-sm font-normal text-slate-400">
                       {isBacklog
                         ? "sin plazo"
@@ -78,7 +79,9 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
                     </span>
                   </h3>
                   <span className={`text-sm font-semibold ${isCurrentWeek ? "text-indigo-300" : "text-slate-400"}`}>
-                    {isBacklog ? `${backlogHoursTotal}h en total` : `${weeklyHoursTotal}h (Carga Semanal)`}
+                    {isBacklog
+                      ? `${backlogHoursTotal}h en total`
+                      : `${weeklyHoursTotal}h (Carga Semanal)${optionalHoursTotal > 0 ? ` + ${optionalHoursTotal}h opcionales` : ""}`}
                   </span>
                 </div>
 
@@ -117,12 +120,12 @@ export function StudyPathView({ pathData, onLogHours }: StudyPathViewProps) {
                               >
                                 {CATEGORY_MAP[task.category]?.name}
                               </span>
-                              {task.track === "alt" && (
+                              {task.track === "opcional" && (
                                 <span
-                                  title="Alternativa de la Fase 6: haces una de las dos opciones. No suma a las horas del plan"
+                                  title="Hora opcional (ampliación o gallego): puedes registrarla, pero no suma a las horas del plan ni al ritmo"
                                   className="px-2 py-0.5 rounded-full text-xs font-mono border border-amber-700 text-amber-400"
                                 >
-                                  Alternativa (no suma al plan)
+                                  Opcional (no suma al plan)
                                 </span>
                               )}
                               {task.interest && (

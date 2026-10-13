@@ -1,25 +1,21 @@
 import type { ColorConfig } from "./types"
 import { getWeeklyHours } from "./route"
 
-// Ruta de 18 meses (docs/ruta-2026-28.md): Etapa 1 = semanas 1–39 a 21 h por semana; Etapa 2 = semanas 40–78 a 12 h.
-// A esas horas se suma una ampliación de 1–4 h por semana (ver lib/route.ts), así que las horas reales de cada semana salen del plan.
-export const TOTAL_WEEKS = 78
-export const STAGE1_LAST_WEEK = 39
-export const HOURS_PER_WEEK_STAGE1 = 21
-export const HOURS_PER_WEEK_STAGE2 = 12
+// Ruta de 24 meses v2.1 (docs/ruta-24-meses-2026-28.md): 15 h fijas por semana, salvo 8 h en la mudanza (semanas 40–43).
+// Las horas opcionales (ampliación y gallego) no cuentan; las horas reales de cada semana salen del plan (ver lib/route.ts).
+export const TOTAL_WEEKS = 104
+export const HOURS_PER_WEEK = 15
 
 /** Horas por día hábil (lunes a viernes) de una semana, según lo planificado en ella */
 export function hoursPerDay(week: number): number {
-  const planned = getWeeklyHours(week)
-  const base = week <= STAGE1_LAST_WEEK ? HOURS_PER_WEEK_STAGE1 : HOURS_PER_WEEK_STAGE2
-  return (planned || base) / 5
+  return (getWeeklyHours(week) || HOURS_PER_WEEK) / 5
 }
 
-// Lunes de la semana 1. Las semanas del plan se calendarizan desde aquí.
-export const START_DATE = new Date(2026, 9, 12)
+// Primer día de la semana 1 (martes 20/10/2026, como en el doc): las semanas del plan van de martes a lunes.
+export const START_DATE = new Date(2026, 9, 20)
 export const LOCAL_STORAGE_KEY = "studyPathLocal"
 /** Sube cuando cambian los ids de las tareas (semana-posición), para no mezclar horas guardadas de otro plan */
-export const PLAN_VERSION = 3
+export const PLAN_VERSION = 4
 
 export const PROFILE_MAP: Record<string, ColorConfig> = {
   it: { name: "Soporte IT", color: "amber-500" },
@@ -53,6 +49,7 @@ export const CATEGORY_MAP: Record<string, ColorConfig> = {
   fundamentos: { name: "Fundamentos", color: "indigo-600" },
   practica: { name: "Práctica", color: "red-600" },
   ingles: { name: "Inglés", color: "emerald-600" },
+  aleman: { name: "Alemán", color: "yellow-600" },
   consolidacion: { name: "Consolidación", color: "amber-600" },
   empleabilidad: { name: "Empleabilidad", color: "pink-600" },
   certificacion: { name: "Certificación", color: "purple-600" },
@@ -67,17 +64,18 @@ export const CATEGORY_MAP: Record<string, ColorConfig> = {
   idiomas: { name: "Otros idiomas", color: "rose-600" },
 }
 
-/** En orden de la ruta (sección 7); las tres últimas son de la Fase 7 */
+/** En orden de la ruta; desde "ITIL 4 Foundation" son de la Fase 7 (opcionales o sin fecha) */
 export const CERTIFICATIONS = [
   "SQL y MySQL (Platzi)",
-  "AZ-900 Azure Fundamentals",
   "Inglés A2 (Platzi)",
-  "AB-900",
-  "Aptis (nivel actual, opcional)",
   "MD-102",
-  "ITIL 4 Foundation",
   "PL-300 Power BI",
+  "AZ-104 Azure Administrator",
   "Aptis B2",
+  "Alemán B1 (ÖSD o Goethe)",
+  "ITIL 4 Foundation",
+  "AZ-900 Azure Fundamentals",
+  "AB-900",
   "AI-901 Azure AI Fundamentals",
   "Google Data Analytics",
   "Google Advanced DA",
@@ -94,53 +92,59 @@ export interface PhaseInfo {
 
 export const PHASE_MAP: Record<number, PhaseInfo> = {
   1: {
-    name: "FASE 1: Base de soporte",
+    name: "FASE 1: Soporte y datos en paralelo",
     color: "indigo-500",
-    weeks: [1, 13],
-    summary: "Hardware, sistemas operativos y redes con Cisco, AZ-900, SQL y Excel, inglés A2, CV y LinkedIn; Git, SQL avanzado, Claude y postulaciones desde la semana 8",
-    milestone: "Semana 13: AZ-900 aprobado, certificados de SQL y de inglés A2, CV listo",
+    weeks: [1, 26],
+    summary:
+      "Hardware, sistemas operativos, redes, GLPI, Active Directory, PowerShell y M365 (P1, P2) · Excel, SQL y Power BI (P4a, P4b) · inglés hacia B1 · CV, LinkedIn y postulaciones desde la semana 9 · opcional: Git, Claude y SQL avanzado",
+    milestone: "Semana 26: P1, P2 v1, P4a v1 y P4b publicados; punto de control de inglés B1",
   },
   2: {
-    name: "FASE 2: Certificar y mostrar",
+    name: "FASE 2: Búsqueda intensiva",
     color: "sky-500",
-    weeks: [14, 26],
-    summary: "Cisco IT Support Specialist, laboratorio de Windows Server y Active Directory, AB-900, Power BI y DAX, SQL avanzado y PostgreSQL, portfolio web, dashboard publicado, inglés B1",
-    milestone: "Semana 26: AZ-900 y AB-900 aprobados, laboratorio y dashboard publicados, inglés B1 en curso",
+    weeks: [27, 39],
+    summary:
+      "Career Path de Cisco, 10 incidencias y 5 artículos, P3 en Packet Tracer, Linux Unhatched, P1 con scripts · SQL en HackerRank y LeetCode, P4a v2 · 10 postulaciones por semana, simulacros sin IA, Scrum y Jira · opcional: portfolio web y contabilidad",
+    milestone: "Semana 39: P1–P4 publicados, inglés B1, 150–250 postulaciones; idealmente, primer empleo",
   },
   3: {
-    name: "FASE 3: Búsqueda intensiva",
+    name: "FASE 3: Mudanza y MD-102",
     color: "violet-500",
-    weeks: [27, 39],
-    summary: "PowerShell, Linux, ciberseguridad, Python con pandas, visualización y EDA, práctica de coding, Scrum y Jira, Aptis opcional, simulacros y 5–10 postulaciones por semana",
-    milestone: "Semana 39: primer empleo remoto",
+    weeks: [40, 60],
+    summary:
+      "Semanas 40–43 a 8 h: trámites en Galicia y postulaciones · MD-102 (Intune) · Power BI avanzado, modelo estrella y ruta del PL-300 · alemán A1 desde la semana 44 · gallego opcional",
+    milestone: "Semana 60: examen MD-102",
   },
   4: {
-    name: "FASE 4: Soporte N2",
+    name: "FASE 4: Servidores y PL-300",
     color: "fuchsia-500",
-    weeks: [40, 52],
-    summary: "MD-102 (Intune) con examen en la semana 52, Power BI avanzado y modelado de datos, BI estratégico y KPIs, Claude Code, inglés B2",
+    weeks: [61, 69],
+    summary: "Windows Server avanzado, Entra Connect, PowerShell intermedio y P2 v2 · PL-300 · alemán A1 → A2",
+    milestone: "Semana 69: examen PL-300",
   },
   5: {
-    name: "FASE 5: Sistemas y BI",
+    name: "FASE 5: Azure, Python e inglés B2",
     color: "cyan-500",
-    weeks: [53, 65],
-    summary: "Cisco Linux Essentials, ITIL 4 Foundation, PL-300 con examen en la semana 65, Aptis B2",
+    weeks: [70, 91],
+    summary: "AZ-104 y Linux Essentials desde la semana 89 · Python con pandas · alemán A2 → B1 · Aptis B2",
+    milestone: "Semana 88: examen AZ-104 · semana 91: Aptis B2",
   },
   6: {
-    name: "FASE 6: Especialización",
+    name: "FASE 6: Linux, proyecto de datos y alemán B1",
     color: "emerald-500",
-    weeks: [66, 78],
-    summary: "Una opción según tu empleo (A: sistemas y cloud, o B: ciberseguridad), contabilidad y finanzas, Power Automate, ERP/SAP, inglés B2",
-    milestone: "Semana 78: soporte N2 y sistemas con MD-102, Linux, ITIL y especialización iniciada; PL-300 y Power Automate; inglés B2 certificado",
+    weeks: [92, 104],
+    summary: "Linux Essentials · proyecto Python + SQL con EDA · CV para España y Viena · alemán B1",
+    milestone: "Semana 104: examen de alemán B1",
   },
   7: {
-    name: "FASE 7: Después de los 18 meses (sin plazo)",
+    name: "FASE 7: Después de octubre de 2028 (sin plazo)",
     color: "rose-500",
-    summary: "En orden de importancia laboral: ERP/SAP, Fabric, Qlik, dbt, networking, CCNA, Azure y AWS, ciberseguridad, IA (de los prompts a los agentes), Python para informes, Tableau, estadística, Google DA, ML, Big Data, Docker, idiomas y cursos en pausa",
+    summary:
+      "En el orden de la ruta: BI en Galicia (ERP/SAP, Power Automate, Fabric, Qlik), sistemas (ITIL, seguridad, opción A o B, AWS), datos (visualización, Tableau, Looker, Google DA, estadística, ML, Big Data) e IA (Claude Code, API, MCP y agentes); al final, empleo, francés y cursos en pausa",
   },
 }
 
-/** Fase de una semana del plan (1–78); las tareas sin plazo (semana 79) son la Fase 7 */
+/** Fase de una semana del plan (1–104); las tareas sin plazo (semana 105) son la Fase 7 */
 export function phaseOfWeek(week: number): number {
   for (const [num, phase] of Object.entries(PHASE_MAP)) {
     if (phase.weeks && week >= phase.weeks[0] && week <= phase.weeks[1]) return Number(num)
