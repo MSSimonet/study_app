@@ -3,12 +3,12 @@ import { ED, ENGLISH_ROUTINE_PREFIX, LLL, SESAME, englishWeek, getRouteCells, ty
 
 /**
  * Plan diario (sección 4.3 del doc): reparte las tareas de cada semana en sus 7 días con la plantilla de minutos por bloque.
- * Las semanas van de martes a lunes (START_DATE es martes) y se llenan en ese orden.
+ * Las semanas van de lunes a domingo (START_DATE es lunes) y se llenan en ese orden.
  *
  * Reglas de reparto de cada bloque:
  *  - las tareas se vierten en orden sobre sus huecos; si una no termina, sigue en el próximo hueco del bloque;
  *  - si el bloque tiene hueco el sábado, ese día van primero los laboratorios y proyectos;
- *  - en la semana de un examen, lo que lo prepara va antes del sábado, el examen ocupa el sábado y el domingo y el lunes
+ *  - en la semana de un examen, lo que lo prepara va antes del sábado, el examen ocupa el sábado y el domingo
  *    siguen con la tarea siguiente. Si el examen dura más que el hueco del sábado (Aptis, PL-300 y alemán A2), ese
  *    sábado se alarga y los demás huecos del bloque se acortan en proporción: la semana suma lo mismo;
  *  - el hueco de inglés se muestra como la rutina de la sección 3.1, con sus pasos, minutos y enlaces.
@@ -144,7 +144,7 @@ function englishSteps(week: number, saturday: boolean, minutes: number): Routine
   return [{ label: e.platzi.label, minutes, link: main }]
 }
 
-/** Primer día (martes) de la semana `week` */
+/** Primer día (lunes) de la semana `week` */
 function weekFirstDay(week: number): Date {
   const d = new Date(START_DATE.getFullYear(), START_DATE.getMonth(), START_DATE.getDate())
   d.setDate(d.getDate() + (week - 1) * 7)
@@ -169,7 +169,7 @@ function scaleSlots(sizes: number[], total: number): number[] {
 
 const WEEK_CACHE: Record<number, DayPlan[]> = {}
 
-/** Los 7 días de una semana (1–104), de martes a lunes */
+/** Los 7 días de una semana (1–104), de lunes a domingo */
 export function getWeekPlan(week: number): DayPlan[] {
   if (WEEK_CACHE[week]) return WEEK_CACHE[week]
   const template = templateOfWeek(week)

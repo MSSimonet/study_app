@@ -2,7 +2,7 @@ import type { Interest, TaskTrack } from "./types"
 
 /**
  * Ruta de 24 meses v3 (docs/ruta-24-meses-2026-28.md): 20 h fijas por semana (10 en la mudanza, semanas 40–43).
- * Inicio martes 20/10/2026 · primer empleo hacia la semana 39 · fin lunes 16/10/2028 (semana 104). Total: 2.040 h.
+ * Inicio lunes 26/10/2026 · primer empleo hacia la semana 39 · fin domingo 22/10/2028 (semana 104). Total: 2.040 h.
  *
  * Capacidad semanal de cada bloque (secciones 3, 4 y 4.2 del doc):
  *  - Semanas 1–26:   inglés 6 + soporte 6 + datos 4 + empleo 2 + ampliación 2 = 20 h
@@ -14,9 +14,9 @@ import type { Interest, TaskTrack } from "./types"
  * que quedan. Si un tramo no cuadra, el módulo falla al cargar. Lo que la sección 4.2 suma va en su orden, detrás del
  * núcleo de cada tramo; si no entra, pasa al tramo siguiente y, si no entra en ninguno, queda en la Fase 7.
  *
- * Exámenes: en su semana, lo que los prepara va antes (de martes a viernes), el examen va el sábado y el domingo y el
- * lunes siguen con la tarea siguiente del bloque (lib/daily-plan.ts). Por eso los tramos de sistemas se cortan en la
- * semana del examen: las 2 h previas al sábado son de repaso y las 2 h del domingo y el lunes, del tramo siguiente.
+ * Exámenes: en su semana, lo que los prepara va antes (de lunes a viernes), el examen va el sábado y el domingo sigue
+ * con la tarea siguiente del bloque (lib/daily-plan.ts). Por eso los tramos de sistemas se cortan en la semana del
+ * examen: las 3 h previas al sábado (lunes, miércoles y viernes) son de repaso y la hora del domingo, del tramo siguiente.
  * El inglés es una tarea semanal con la rutina de la sección 3.1, que lib/daily-plan.ts reparte por días.
  */
 
@@ -417,13 +417,13 @@ const FASE2: Segment[] = [
       { name: "AZ-900: práctica y guía de Microsoft Learn (parte 1 de 22 h; el examen es opcional)", hours: 4, category: "certificacion", profile: ["it", "sys"], tech: ["cloud"], links: [AZ900] },
       {
         name: "MD-102: laboratorio de Intune (prueba de 30 días de Intune o M365 Business Premium, opcional: pide tarjeta, cancela a tiempo)",
-        hours: 13,
+        hours: 14,
         category: "certificacion",
         profile: ["it", "sys"],
         tech: ["windows"],
         links: [MD102],
       },
-      { name: "MD-102: simulacros", hours: 8, category: "certificacion", profile: ["it", "sys"], tech: ["windows"], links: [MD102] },
+      { name: "MD-102: simulacros", hours: 7, category: "certificacion", profile: ["it", "sys"], tech: ["windows"], links: [MD102] },
     ],
   },
   {
@@ -431,12 +431,12 @@ const FASE2: Segment[] = [
     weeks: [60, 69],
     cap: 7,
     sequence: [
-      // semana 60: 2 h de simulacros (miércoles y viernes), examen el sábado y el tramo siguiente el domingo y el lunes
-      { name: "MD-102: simulacros (resto)", hours: 2, category: "certificacion", profile: ["it", "sys"], tech: ["windows"], links: [MD102] },
+      // semana 60: 3 h de simulacros (lunes, miércoles y viernes), examen el sábado y el tramo siguiente el domingo
+      { name: "MD-102: simulacros (resto)", hours: 3, category: "certificacion", profile: ["it", "sys"], tech: ["windows"], links: [MD102] },
       { name: "MD-102: examen (semana 60)", hours: 3, category: "certificacion", profile: ["it", "sys"], tech: ["windows"], links: [MD102], cert: "MD-102" },
       { name: "Windows Server avanzado", hours: 12, category: "sistemas", profile: ["sys"], tech: ["windows"], links: [WS2025] },
       { name: "Identidad híbrida: Entra Connect", hours: 8, category: "sistemas", profile: ["sys"], tech: ["windows", "cloud"], links: [ENTRA_CONNECT] },
-      { name: "Práctica: identidad híbrida con Entra Connect en el laboratorio P1", hours: 2, category: "practica", profile: ["sys"], tech: ["windows", "cloud"], links: [ENTRA_CONNECT] },
+      { name: "Práctica: identidad híbrida con Entra Connect en el laboratorio P1", hours: 1, category: "practica", profile: ["sys"], tech: ["windows", "cloud"], links: [ENTRA_CONNECT] },
       { name: "Platzi «Azure Active Directory»", hours: 8, category: "sistemas", profile: ["it", "sys"], tech: ["windows", "cloud"], links: [P("azure-active-directory")] },
       { name: "PowerShell intermedio: funciones, manejo de errores y logs", hours: 10, category: "sistemas", profile: ["it", "sys"], tech: ["windows", "linux"], links: [PS_INTRO, PS_AD] },
       { name: "P2 v2: manejo de errores, parámetros, una prueba simple y CSV de resultados que lee P4a", hours: 7, category: "practica", profile: ["it", "sys"], tech: ["windows", "linux"], links: [PS_AD] },
@@ -456,13 +456,13 @@ const FASE2: Segment[] = [
       { name: "Platzi «Azure IaaS»: almacenamiento y bases de datos en Azure", hours: 20, category: "sistemas", profile: ["sys"], tech: ["cloud"], links: [P("azure-iaas")] },
       {
         name: "AZ-104: laboratorios (la cuenta gratuita de Azure da 200 US$ por 30 días y pide tarjeta; los sandboxes de Learn ya no existen)",
-        hours: 13,
+        hours: 14,
         category: "certificacion",
         profile: ["sys"],
         tech: ["cloud"],
         links: [AZ104, AZURE_FREE],
       },
-      { name: "AZ-104: simulacros", hours: 8, category: "certificacion", profile: ["sys"], tech: ["cloud"], links: [AZ104] },
+      { name: "AZ-104: simulacros", hours: 7, category: "certificacion", profile: ["sys"], tech: ["cloud"], links: [AZ104] },
     ],
   },
   {
@@ -470,14 +470,14 @@ const FASE2: Segment[] = [
     weeks: [88, 104],
     cap: 7,
     sequence: [
-      // semana 88: 2 h de simulacros, examen el sábado y Linux Essentials el domingo y el lunes
-      { name: "AZ-104: simulacros (resto)", hours: 2, category: "certificacion", profile: ["sys"], tech: ["cloud"], links: [AZ104] },
+      // semana 88: 3 h de simulacros, examen el sábado y Linux Essentials el domingo
+      { name: "AZ-104: simulacros (resto)", hours: 3, category: "certificacion", profile: ["sys"], tech: ["cloud"], links: [AZ104] },
       { name: "AZ-104: examen (semana 88)", hours: 3, category: "certificacion", profile: ["sys"], tech: ["cloud"], links: [AZ104], cert: "AZ-104 Azure Administrator" },
       { name: "Cisco «Fundamentos de Linux» (Linux Essentials): resto hasta completar las 70 h", hours: 52, category: "sistemas", profile: ["sys"], tech: ["linux"], links: [NA_LINUX] },
       { name: "Platzi «Introducción a AWS» (para comparar con Azure)", hours: 10, category: "ingenieria", tech: ["cloud"], profile: ["de", "sys"], links: [P("aws-fundamentos")] },
       { name: "Práctica: desplegar un servicio básico en AWS", hours: 3, category: "practica", tech: ["cloud"], profile: ["de", "sys"], links: [P("aws-fundamentos")] },
       { name: "Cisco «Técnico en Redes» (45 de sus 70 h; el resto, después de octubre de 2028)", hours: 45, category: "sistemas", profile: ["sys"], tech: ["redes"], links: [NA_NETTECH] },
-      { name: "Práctica: servidor Ubuntu con GLPI montado desde cero con lo de Linux Essentials", hours: 4, category: "practica", profile: ["sys"], tech: ["linux"], links: [NA_LINUX, GLPI] },
+      { name: "Práctica: servidor Ubuntu con GLPI montado desde cero con lo de Linux Essentials", hours: 3, category: "practica", profile: ["sys"], tech: ["linux"], links: [NA_LINUX, GLPI] },
     ],
   },
 
