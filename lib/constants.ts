@@ -11,8 +11,8 @@ export function hoursPerDay(week: number): number {
   return (getWeeklyHours(week) || HOURS_PER_WEEK) / 5
 }
 
-// Primer día de la semana 1 (martes 20/10/2026, como en el doc): las semanas del plan van de martes a lunes.
-export const START_DATE = new Date(2026, 9, 20)
+// Primer día de la semana 1 (lunes 26/10/2026): las semanas del plan van de lunes a domingo.
+export const START_DATE = new Date(2026, 9, 26)
 export const LOCAL_STORAGE_KEY = "studyPathLocal"
 /** Sube cuando cambian los ids de las tareas (semana-posición), para no mezclar horas guardadas de otro plan */
 export const PLAN_VERSION = 5
