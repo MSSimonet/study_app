@@ -1,4 +1,4 @@
-# Ruta IT de 24 meses · 20/10/2026 → 16/10/2028
+# Ruta IT de 24 meses · 26/10/2026 → 22/10/2028
 
 **Candidato:**
 - 52 años, ciudadano español, vive en Argentina y se muda a Galicia en julio de 2027.
@@ -9,6 +9,7 @@
 **Versión 2 (12/10/2026):** soporte y datos en paralelo desde la semana 1, para el primer empleo.
 **Versión 2.1 (13/10/2026):** ubicados los temas del repo que la ruta no traía (sección 4.1). No se quita ninguno.
 **Versión 3 (13/10/2026):** 20 h por semana fijas y alemán a 3 h por semana. Las horas ganadas van a inglés, soporte/sistemas, datos y gallego (sección 4.2). Total: **2.040 h** (antes 1.532 fijas).
+**Versión 3.1 (14/10/2026):** la ruta empieza el **lunes 26/10/2026** y termina el domingo 22/10/2028; las semanas van de lunes a domingo. Las semanas de examen se corren 6 días: MD-102 el 18/12/2027, PL-300 el 19/02/2028, Aptis el 22/04/2028, AZ-104 el 01/07/2028 y alemán A2 el 21/10/2028.
 
 **Cómo leer este documento:** cada sección separa tres tipos de contenido.
 
@@ -54,7 +55,7 @@
 
 **[PLAN]** Recargar la app con esta ruta:
 - `TOTAL_WEEKS = 104`.
-- `START_DATE = 20/10/2026`.
+- `START_DATE = 26/10/2026` (lunes; en la versión 3 era el martes 20/10/2026).
 - `PLAN_VERSION = 4`.
 - Corregir el email de git antes del próximo commit.
 
@@ -364,7 +365,7 @@
 
 ## 4. Itinerario técnico en dos fases
 
-### FASE 1 · Meses 1–9 · semanas 1–39 · 20/10/2026 → 19/07/2027 · antes de la mudanza
+### FASE 1 · Meses 1–9 · semanas 1–39 · 26/10/2026 → 25/07/2027 · antes de la mudanza
 
 **Carga:** 20 h por semana fijas (versión 3; antes 15 + opcionales).
 
@@ -381,13 +382,13 @@ La tabla de meses de abajo es el núcleo. Lo que se suma con las horas extra est
 
 | Mes | Semanas · fechas | Soporte | Datos | Entregable |
 |---|---|---|---|---|
-| **1** | 1–4 · 20/10 → 16/11/2026 | Terminar Platzi "Computadores" (vas 16/26) y "Terminal" (23/26). Cisco Hardware Basics (6 h) y Operating Systems Basics (12 h) | Terminar Platzi "SQL y MySQL" (1 clase). Platzi "Excel Intermedio" | Corregir el email de git |
-| **2** | 5–9 · 17/11 → 21/12 | Cisco IT Customer Support Basics (4 h) y "Conceptos básicos de redes" (22 h) | Platzi "Excel Avanzado para Análisis de Datos" | CV en español e inglés (con el diploma de la Xunta), LinkedIn. **Semana 9: primeras postulaciones** |
-| **3** | 10–13 · 22/12 → 18/01/2027 | **Preparar el host:** comprobar si tu Windows es Home (sin Hyper-V → VirtualBox 7.2); Ubuntu Server 26.04; descargar las evaluaciones de Windows Server 2025 y Windows 11 (instalarlas en el mes 4, porque el plazo corre desde la instalación). **GLPI en Docker** (`glpi/glpi`): categorías, prioridades, SLA, base de conocimiento. Práctica en Packet Tracer | Platzi "Fundamentos de Bases de Datos y SQL". Primeras consultas SQL sobre la base de datos de GLPI | README "Lab host" en GitHub |
-| **4** | 14–17 · 19/01 → 15/02 | **Active Directory:** controlador de dominio en Windows Server Core (2 GB), DNS, DHCP, unidades organizativas, usuarios, grupos, GPO. Cliente Windows 11 (4 GB) unido al dominio | Platzi "Power BI" | **P1 v1** publicado |
-| **5** | 18–22 · 16/02 → 22/03 | **PowerShell básico** con el módulo de Active Directory. Teoría de Microsoft 365 y Entra ID (guía de AB-900 en Learn, sin examen) | Platzi "Power BI DAX". **P4a v1:** panel de SLA con 200 tickets simulados | **P2 v1** (altas y bajas desde un CSV) y **P4a v1** publicados |
-| **6** | 23–26 · 23/03 → 19/04 | Cisco "IT Support Specialist Career Path" (30 h; sigue en 7–9). Primeras 5 incidencias simuladas en P1, cada una con su ticket en GLPI. Conceptos de ITSM (incidente, problema, cambio, SLA) | **P4b:** panel del pensionado con datos reales (ocupación, ingresos, clientes); ya está en la ruta del repo | P4b publicado; punto de control de inglés B1 |
-| **7–9** | 27–39 · 20/04 → 19/07 | Terminar el Career Path. 10 incidencias + 5 artículos de conocimiento en español e inglés. **P3** en Packet Tracer. Linux Unhatched (8 h). Banco de 30 preguntas técnicas respondidas en español e inglés. **Reconstruir P1 con scripts**, porque la evaluación de Windows 11 caduca a los 90 días. Simulacros semanales sin IA | Práctica de SQL en HackerRank y LeetCode (gratis). **P4a v2** con los tickets reales de P1. 20 preguntas típicas de entrevista de datos (SQL, Excel, Power BI) | 10 postulaciones por semana, entrevistas. Scrum y Jira básico (3 h). Semanas 36–39: mudanza |
+| **1** | 1–4 · 26/10 → 22/11/2026 | Terminar Platzi "Computadores" (vas 16/26) y "Terminal" (23/26). Cisco Hardware Basics (6 h) y Operating Systems Basics (12 h) | Terminar Platzi "SQL y MySQL" (1 clase). Platzi "Excel Intermedio" | Corregir el email de git |
+| **2** | 5–9 · 23/11 → 27/12 | Cisco IT Customer Support Basics (4 h) y "Conceptos básicos de redes" (22 h) | Platzi "Excel Avanzado para Análisis de Datos" | CV en español e inglés (con el diploma de la Xunta), LinkedIn. **Semana 9: primeras postulaciones** |
+| **3** | 10–13 · 28/12 → 24/01/2027 | **Preparar el host:** comprobar si tu Windows es Home (sin Hyper-V → VirtualBox 7.2); Ubuntu Server 26.04; descargar las evaluaciones de Windows Server 2025 y Windows 11 (instalarlas en el mes 4, porque el plazo corre desde la instalación). **GLPI en Docker** (`glpi/glpi`): categorías, prioridades, SLA, base de conocimiento. Práctica en Packet Tracer | Platzi "Fundamentos de Bases de Datos y SQL". Primeras consultas SQL sobre la base de datos de GLPI | README "Lab host" en GitHub |
+| **4** | 14–17 · 25/01 → 21/02 | **Active Directory:** controlador de dominio en Windows Server Core (2 GB), DNS, DHCP, unidades organizativas, usuarios, grupos, GPO. Cliente Windows 11 (4 GB) unido al dominio | Platzi "Power BI" | **P1 v1** publicado |
+| **5** | 18–22 · 22/02 → 28/03 | **PowerShell básico** con el módulo de Active Directory. Teoría de Microsoft 365 y Entra ID (guía de AB-900 en Learn, sin examen) | Platzi "Power BI DAX". **P4a v1:** panel de SLA con 200 tickets simulados | **P2 v1** (altas y bajas desde un CSV) y **P4a v1** publicados |
+| **6** | 23–26 · 29/03 → 25/04 | Cisco "IT Support Specialist Career Path" (30 h; sigue en 7–9). Primeras 5 incidencias simuladas en P1, cada una con su ticket en GLPI. Conceptos de ITSM (incidente, problema, cambio, SLA) | **P4b:** panel del pensionado con datos reales (ocupación, ingresos, clientes); ya está en la ruta del repo | P4b publicado; punto de control de inglés B1 |
+| **7–9** | 27–39 · 26/04 → 25/07 | Terminar el Career Path. 10 incidencias + 5 artículos de conocimiento en español e inglés. **P3** en Packet Tracer. Linux Unhatched (8 h). Banco de 30 preguntas técnicas respondidas en español e inglés. **Reconstruir P1 con scripts**, porque la evaluación de Windows 11 caduca a los 90 días. Simulacros semanales sin IA | Práctica de SQL en HackerRank y LeetCode (gratis). **P4a v2** con los tickets reales de P1. 20 preguntas típicas de entrevista de datos (SQL, Excel, Power BI) | 10 postulaciones por semana, entrevistas. Scrum y Jira básico (3 h). Semanas 36–39: mudanza |
 
 **Hito de la semana 39:**
 - 4 proyectos publicados (P1–P4).
@@ -396,7 +397,7 @@ La tabla de meses de abajo es el núcleo. Lo que se suma con las horas extra est
 - 150–250 postulaciones registradas.
 - Idealmente, empleo de soporte, soporte de aplicaciones o datos (escenarios a/b de la sección 2).
 
-### FASE 2 · Meses 10–24 · semanas 40–104 · 20/07/2027 → 16/10/2028 · trabajando
+### FASE 2 · Meses 10–24 · semanas 40–104 · 26/07/2027 → 22/10/2028 · trabajando
 
 **Carga (versión 3):** 20 h por semana, salvo las 4 semanas de la mudanza (10 h). Estarás trabajando: son unas 3 h por día laborable y 5 h el fin de semana.
 
@@ -411,11 +412,11 @@ La tabla de abajo es el núcleo de cada tramo (las columnas de horas son las de 
 
 | Semanas · fechas | Sistemas | Datos | Inglés | Alemán | Contenido |
 |---|---|---|---|---|---|
-| **40–43** · 20/07 → 16/08/2027 | 4 | 2 | 2 | 0 | **Mudanza:** padrón, DNI, inscripción como demandante de empleo en Galicia (da acceso al programa de la Xunta para mayores de 52). Postular a helpdesk N1 y a puestos con Excel/Power BI, en Galicia y remotos en España |
-| **44–60** · 17/08 → 13/12/2027 | 5 | 3 | 3 | 4 | Sistemas: **MD-102** (Intune, despliegue de Windows, cumplimiento de dispositivos), **examen en la semana 60**. Prueba de Intune o M365 Business Premium opcional (30 días, piden tarjeta, cancela a tiempo). Datos: Platzi "Power BI Avanzado", modelo en estrella, Power Query; ruta del PL-300 en Learn |
-| **61–69** · 14/12/2027 → 14/02/2028 | 5 | 3 | 3 | 4 | Sistemas: Windows Server avanzado, identidad híbrida (Entra Connect), PowerShell intermedio (funciones, manejo de errores, logs) → **P2 v2**. Datos: simulacros y **examen PL-300 en la semana 69** |
-| **70–91** · 15/02 → 17/07/2028 | 4 | 2 | 3 | 6 | Sistemas: curso AZ-900 de Platzi (5 h) como entrada y después **Azure, administración (AZ-104)**, **examen en la semana 88**; la cuenta gratuita de Azure da 200 US$ por 30 días y pide tarjeta; los sandboxes de Learn ya no existen. Cisco Linux Essentials desde la semana 89. Datos: Python con pandas (Platzi "Fundamentos de Python", vas 5/32). **Aptis B2 en la semana 78** |
-| **92–104** · 18/07 → 16/10/2028 | 4 | 2 | 2 | 7 | Sistemas: Linux Essentials (con las semanas 89–91 suman ≈ 64 de sus 70 h). ITIL 4 Foundation solo si lo paga la empresa. Datos: proyecto Python + SQL (con CTE y funciones de ventana) y EDA aplicado a ese proyecto. CV para España y Viena. **Alemán A2 en la semana 104 (examen opcional)** |
+| **40–43** · 26/07 → 22/08/2027 | 4 | 2 | 2 | 0 | **Mudanza:** padrón, DNI, inscripción como demandante de empleo en Galicia (da acceso al programa de la Xunta para mayores de 52). Postular a helpdesk N1 y a puestos con Excel/Power BI, en Galicia y remotos en España |
+| **44–60** · 23/08 → 19/12/2027 | 5 | 3 | 3 | 4 | Sistemas: **MD-102** (Intune, despliegue de Windows, cumplimiento de dispositivos), **examen en la semana 60**. Prueba de Intune o M365 Business Premium opcional (30 días, piden tarjeta, cancela a tiempo). Datos: Platzi "Power BI Avanzado", modelo en estrella, Power Query; ruta del PL-300 en Learn |
+| **61–69** · 20/12/2027 → 20/02/2028 | 5 | 3 | 3 | 4 | Sistemas: Windows Server avanzado, identidad híbrida (Entra Connect), PowerShell intermedio (funciones, manejo de errores, logs) → **P2 v2**. Datos: simulacros y **examen PL-300 en la semana 69** |
+| **70–91** · 21/02 → 23/07/2028 | 4 | 2 | 3 | 6 | Sistemas: curso AZ-900 de Platzi (5 h) como entrada y después **Azure, administración (AZ-104)**, **examen en la semana 88**; la cuenta gratuita de Azure da 200 US$ por 30 días y pide tarjeta; los sandboxes de Learn ya no existen. Cisco Linux Essentials desde la semana 89. Datos: Python con pandas (Platzi "Fundamentos de Python", vas 5/32). **Aptis B2 en la semana 78** |
+| **92–104** · 24/07 → 22/10/2028 | 4 | 2 | 2 | 7 | Sistemas: Linux Essentials (con las semanas 89–91 suman ≈ 64 de sus 70 h). ITIL 4 Foundation solo si lo paga la empresa. Datos: proyecto Python + SQL (con CTE y funciones de ventana) y EDA aplicado a ese proyecto. CV para España y Viena. **Alemán A2 en la semana 104 (examen opcional)** |
 
 **Si tu primer empleo es de datos:** invierte los bloques desde la semana 44 (datos 7 h, sistemas 5 h). PL-300 pasa a la semana 60 y MD-102 a después de octubre de 2028.
 
@@ -610,18 +611,18 @@ La app reparte las tareas de cada semana en los 7 días con esta plantilla. Cada
 
 | Período | Semanas | Fechas | h/semana | Foco | Hito |
 |---|---|---|---|---|---|
-| Mes 1 | 1–4 | 20/10 → 16/11/2026 | 20 | Hardware, Windows · Excel | — |
-| Mes 2 | 5–9 | 17/11 → 21/12 | 20 | Redes · Excel avanzado · CV | Primeras postulaciones |
-| Mes 3 | 10–13 | 22/12 → 18/01/2027 | 20 | Host, GLPI, seguridad básica · SQL | Laboratorio listo |
-| Mes 4 | 14–17 | 19/01 → 15/02 | 20 | Active Directory · Power BI | P1 v1 |
-| Mes 5 | 18–22 | 16/02 → 22/03 | 20 | PowerShell, M365 · DAX | P2 v1 y P4a v1 |
-| Mes 6 | 23–26 | 23/03 → 19/04 | 20 | Diagnóstico, ITSM · pensionado | P4b; B1 de inglés en curso |
-| Meses 7–9 | 27–39 | 20/04 → 19/07 | 20 | Búsqueda intensiva, incidencias, P3, Linux, Intune · SQL | P1–P4; empleo o plan B; mudanza |
-| Mudanza | 40–43 | 20/07 → 16/08/2027 | 10 | Trámites y postulaciones en Galicia | — |
-| Meses 11–14 | 44–60 | 17/08 → 13/12/2027 | 20 | MD-102, seguridad de terminales · Power BI avanzado, contabilidad, SAP · alemán A1, gallego | MD-102 (semana 60) |
-| Meses 14–16 | 61–69 | 14/12/2027 → 14/02/2028 | 20 | Servidores, PowerShell, AZ-900 · PL-300, Power Automate | P2 v2; PL-300 (semana 69) |
-| Meses 16–21 | 70–91 | 15/02 → 17/07/2028 | 20 | AZ-104, Azure IaaS, ITIL, AWS, Linux · Python, Tableau, Fabric · inglés B2, alemán A2 | Aptis B2 (semana 78); AZ-104 (semana 88) |
-| Meses 22–24 | 92–104 | 18/07 → 16/10/2028 | 20 | Linux, redes (Cisco) · proyecto integrador BI · CV para la UE | Alemán A2 (opcional) |
+| Mes 1 | 1–4 | 26/10 → 22/11/2026 | 20 | Hardware, Windows · Excel | — |
+| Mes 2 | 5–9 | 23/11 → 27/12 | 20 | Redes · Excel avanzado · CV | Primeras postulaciones |
+| Mes 3 | 10–13 | 28/12 → 24/01/2027 | 20 | Host, GLPI, seguridad básica · SQL | Laboratorio listo |
+| Mes 4 | 14–17 | 25/01 → 21/02 | 20 | Active Directory · Power BI | P1 v1 |
+| Mes 5 | 18–22 | 22/02 → 28/03 | 20 | PowerShell, M365 · DAX | P2 v1 y P4a v1 |
+| Mes 6 | 23–26 | 29/03 → 25/04 | 20 | Diagnóstico, ITSM · pensionado | P4b; B1 de inglés en curso |
+| Meses 7–9 | 27–39 | 26/04 → 25/07 | 20 | Búsqueda intensiva, incidencias, P3, Linux, Intune · SQL | P1–P4; empleo o plan B; mudanza |
+| Mudanza | 40–43 | 26/07 → 22/08/2027 | 10 | Trámites y postulaciones en Galicia | — |
+| Meses 11–14 | 44–60 | 23/08 → 19/12/2027 | 20 | MD-102, seguridad de terminales · Power BI avanzado, contabilidad, SAP · alemán A1, gallego | MD-102 (semana 60) |
+| Meses 14–16 | 61–69 | 20/12/2027 → 20/02/2028 | 20 | Servidores, PowerShell, AZ-900 · PL-300, Power Automate | P2 v2; PL-300 (semana 69) |
+| Meses 16–21 | 70–91 | 21/02 → 23/07/2028 | 20 | AZ-104, Azure IaaS, ITIL, AWS, Linux · Python, Tableau, Fabric · inglés B2, alemán A2 | Aptis B2 (semana 78); AZ-104 (semana 88) |
+| Meses 22–24 | 92–104 | 24/07 → 22/10/2028 | 20 | Linux, redes (Cisco) · proyecto integrador BI · CV para la UE | Alemán A2 (opcional) |
 
 **Horas planificadas (versión 3):**
 - Fase 1: 780 h (39 × 20).
